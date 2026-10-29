@@ -1,1 +1,165 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ninja Rebirth VN</title></head><body style="margin:0;font-family:system-ui,sans-serif;background:#0f1220;color:#eee;text-align:center"><h1 style="padding-top:80px;color:#ff5a5f">Ninja Rebirth VN</h1><p>Game sắp ra mắt.</p></body></html>
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0c14">
+<title>Ninja Rebirth VN — Hồi Sinh Nhẫn Giả</title>
+<meta name="description" content="Ninja Rebirth VN - game nhập vai nhẫn giả theo lượt, chơi trực tiếp trên trình duyệt, không cần cài đặt.">
+<link rel="icon" type="image/svg+xml" href="assets/img/icon.svg">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<div class="mist" aria-hidden="true">
+  <span class="petal p1"></span><span class="petal p2"></span><span class="petal p3"></span>
+  <span class="petal p4"></span><span class="petal p5"></span><span class="petal p6"></span>
+  <span class="petal p7"></span><span class="petal p8"></span>
+</div>
+
+<div id="app">
+
+  <!-- ============ TITLE ============ -->
+  <section class="screen is-active" id="screen-title">
+    <div class="title-scene">
+      <div class="title-mountains" aria-hidden="true">
+        <svg viewBox="0 0 1200 420" preserveAspectRatio="none">
+          <path d="M0 420 L0 300 L120 210 L210 268 L320 160 L430 250 L540 200 L640 285 L760 190 L880 265 L980 225 L1100 300 L1200 250 L1200 420 Z" fill="#111527"/>
+          <path d="M0 420 L0 350 L140 285 L250 335 L380 250 L500 330 L620 280 L740 345 L860 265 L980 330 L1100 290 L1200 350 L1200 420 Z" fill="#0d1020"/>
+        </svg>
+      </div>
+      <div class="title-moon" aria-hidden="true"></div>
+      <div class="title-gate" aria-hidden="true">
+        <svg viewBox="0 0 400 300">
+          <g fill="none" stroke="#2a1a22" stroke-width="14">
+            <path d="M90 300 L90 90"/><path d="M310 300 L310 90"/>
+            <path d="M60 90 Q200 60 340 90"/>
+            <path d="M70 130 L330 130"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="title-content">
+        <p class="title-kicker">Nhẫn Giới · Ngũ Hành Loạn Thế</p>
+        <img class="title-logo" src="assets/img/logo.svg" alt="Ninja Rebirth VN" width="520" height="150">
+        <p class="title-sub">Hồi sinh một gia tộc đã bị xoá sổ. Chiêu mộ nhẫn giả, luyện bí kỹ,<br>phá tan Huyết Nguyệt Giáo.</p>
+        <div class="title-actions">
+          <button class="btn btn-primary btn-lg" id="btn-new">Bắt đầu hành trình</button>
+          <button class="btn btn-ghost btn-lg" id="btn-continue" hidden>Tiếp tục</button>
+        </div>
+        <div class="title-foot">
+          <button class="link-btn" id="btn-guide-title">Hướng dẫn</button>
+          <span>·</span>
+          <button class="link-btn" id="btn-sound-title">Âm thanh: Bật</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CREATE ============ -->
+  <section class="screen" id="screen-create">
+    <div class="create-wrap">
+      <header class="create-head">
+        <p class="eyebrow">Bước 1 / 1</p>
+        <h1>Chọn nhẫn giả khai môn</h1>
+        <p class="muted">Người đồng hành đầu tiên của bạn. Hai nhẫn giả còn lại sẽ gia nhập trên đường.</p>
+      </header>
+      <div class="starter-grid" id="starter-grid"></div>
+      <div class="create-preview" id="create-preview"></div>
+      <div class="create-actions">
+        <label class="field">
+          <span>Đạo hiệu của bạn</span>
+          <input id="input-name" maxlength="16" placeholder="Vô Danh" autocomplete="off">
+        </label>
+        <button class="btn btn-primary btn-lg" id="btn-confirm-create">Tiến vào Nhẫn Giới</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HUB ============ -->
+  <section class="screen" id="screen-hub">
+    <header class="topbar">
+      <div class="brand">
+        <img src="assets/img/icon.svg" alt="" width="34" height="34">
+        <div>
+          <strong>Ninja Rebirth</strong>
+          <small>Chi nhánh VN</small>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" id="btn-guide" title="Hướng dẫn">?</button>
+        <button class="icon-btn" id="btn-sound" title="Âm thanh">♪</button>
+        <button class="icon-btn" id="btn-menu" title="Tùy chọn">☰</button>
+        <div class="res-pill" title="Linh Thạch">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 2 3 12l9 10 9-10z" fill="#ffd166"/></svg>
+          <span id="res-gold">0</span>
+        </div>
+      </div>
+    </header>
+
+    <nav class="tabbar" id="tabbar">
+      <button class="tab is-active" data-panel="team">
+        <span class="tab-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3.2 19.2c0-3.3 2.6-5.4 5.8-5.4s5.8 2.1 5.8 5.4"/><path d="M16.2 6.4a3 3 0 0 1 0 5.4M18.4 18.8c0-2.3-1-3.9-2.6-4.7"/></svg></span><span>Đội hình</span>
+      </button>
+      <button class="tab" data-panel="campaign">
+        <span class="tab-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 19.5 15 9"/><path d="M14.4 4.2h5.4v5.4"/><path d="M19.8 4.2 13 11"/><path d="M3 21l3.4-3.4"/></svg></span><span>Nhiệm vụ</span>
+      </button>
+      <button class="tab" data-panel="roster">
+        <span class="tab-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 2.5 14.4 9.6 21.5 12 14.4 14.4 12 21.5 9.6 14.4 2.5 12 9.6 9.6Z"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg></span><span>Nhẫn giả</span>
+      </button>
+      <button class="tab" data-panel="shop">
+        <span class="tab-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.4 8h15.2l-1.4 11.2a1 1 0 0 1-1 .8H6.8a1 1 0 0 1-1-.8Z"/><path d="M9 8V6.2a3 3 0 0 1 6 0V8"/></svg></span><span>Cửa hàng</span>
+      </button>
+      <button class="tab" data-panel="arena">
+        <span class="tab-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3.5"/><path d="M6 4.2h11.4l-2 4 2 4H6"/></svg></span><span>Đấu trường</span>
+      </button>
+    </nav>
+
+    <main class="panels" id="panels">
+      <section class="panel is-active" id="panel-team"></section>
+      <section class="panel" id="panel-campaign"></section>
+      <section class="panel" id="panel-roster"></section>
+      <section class="panel" id="panel-shop"></section>
+      <section class="panel" id="panel-arena"></section>
+    </main>
+  </section>
+
+  <!-- ============ BATTLE ============ -->
+  <section class="screen" id="screen-battle">
+    <div class="battle-frame">
+      <div class="battle-head">
+        <div>
+          <p class="battle-kicker" id="battle-kicker">Nhiệm vụ</p>
+          <h2 id="battle-title">Chiến đấu</h2>
+        </div>
+        <div class="battle-tools">
+          <button class="chip" id="btn-auto">Tự động: Tắt</button>
+          <button class="chip" id="btn-speed">Tốc độ: ×1</button>
+          <button class="chip" id="btn-flee">Rút lui</button>
+        </div>
+      </div>
+
+      <div class="battle-field" id="battle-field">
+        <div class="field-side" id="side-enemy"></div>
+        <div class="field-mid"><span id="wave-label"></span></div>
+        <div class="field-side" id="side-ally"></div>
+      </div>
+
+      <div class="battle-foot">
+        <div class="log" id="battle-log" aria-live="polite"></div>
+        <div class="actions" id="action-bar"></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="modal-root"></div>
+<div id="toast-root" class="toast-root" aria-live="polite"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/art.js"></script>
+<script src="assets/js/sfx.js"></script>
+<script src="assets/js/battle.js"></script>
+<script src="assets/js/game.js"></script>
+</body>
+</html>
