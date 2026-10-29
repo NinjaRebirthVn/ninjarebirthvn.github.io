@@ -72,27 +72,28 @@ const Art = (function () {
 
   /* ---------------- Vũ khí ---------------- */
   function weaponBack(kind, p) {
+    const wc = p.wc || p.ec;
     if (kind === 'staff') {
       return `<g transform="translate(28 192) rotate(7)">
           <rect x="-3.5" y="-136" width="7" height="164" rx="3.5" fill="#6b5a48"/>
           <rect x="-3.5" y="-136" width="2.4" height="164" fill="#a08b72" opacity=".7"/>
-          <circle cx="0" cy="-142" r="11" fill="${p.ec}" opacity=".9"/>
+          <circle cx="0" cy="-142" r="11" fill="${wc}" opacity=".9"/>
           <circle cx="0" cy="-142" r="11" fill="${pct(p.ec, 0.5)}" opacity=".6"/>
-          <circle cx="0" cy="-142" r="19" fill="none" stroke="${p.ec}" stroke-width="1.6" opacity=".4"/>
+          <circle cx="0" cy="-142" r="19" fill="none" stroke="${wc}" stroke-width="1.6" opacity=".4"/>
           <circle cx="-3" cy="-145" r="4" fill="#fff" opacity=".6"/>
         </g>`;
     }
     if (kind === 'bow') {
       return `<g transform="translate(160 152)">
-          <path d="M-4 -80 Q52 -26 -4 28" stroke="${p.ec}" stroke-width="4.5" fill="none" opacity=".95"/>
+          <path d="M-4 -80 Q52 -26 -4 28" stroke="${wc}" stroke-width="4.5" fill="none" opacity=".95"/>
           <path d="M-4 -80 Q12 -26 -4 28" stroke="#eef4ff" stroke-width="1.2" fill="none" opacity=".65"/>
           <path d="M-4 -80 L-6 28" stroke="#dbe4f0" stroke-width="1" opacity=".35"/>
         </g>`;
     }
     if (kind === 'fan') {
       return `<g transform="translate(162 190) rotate(-16)">
-          <path d="M0 0 L-74 -52 A86 86 0 0 1 -16 -84 Z" fill="${p.ec}" opacity=".28" stroke="${p.ec}" stroke-width="2.4"/>
-          <path d="M0 0 L-74 -52 M0 0 L-52 -74 M0 0 L-20 -86" stroke="${p.ec}" stroke-width="1.6" opacity=".75"/>
+          <path d="M0 0 L-74 -52 A86 86 0 0 1 -16 -84 Z" fill="${wc}" opacity=".28" stroke="${wc}" stroke-width="2.4"/>
+          <path d="M0 0 L-74 -52 M0 0 L-52 -74 M0 0 L-20 -86" stroke="${wc}" stroke-width="1.6" opacity=".75"/>
           <rect x="-4" y="0" width="9" height="18" rx="3" fill="#2b2438"/>
         </g>`;
     }
@@ -100,14 +101,15 @@ const Art = (function () {
   }
 
   function weaponFront(kind, p) {
+    const wc = p.wc || p.ec;
     if (kind === 'katana') {
       return `<g transform="translate(180 184) rotate(-12)">
           <rect x="-4" y="-96" width="8" height="100" rx="3" fill="#e6edf8" opacity=".95"/>
           <rect x="-4" y="-96" width="2.6" height="100" fill="#ffffff" opacity=".75"/>
-          <path d="M4 -96 L4 4" stroke="${p.ec}" stroke-width="1.6" opacity=".8"/>
-          <rect x="-9" y="3" width="18" height="5" rx="2.5" fill="${p.ec}"/>
+          <path d="M4 -96 L4 4" stroke="${wc}" stroke-width="1.6" opacity=".8"/>
+          <rect x="-9" y="3" width="18" height="5" rx="2.5" fill="${wc}"/>
           <rect x="-4" y="8" width="8" height="22" rx="3" fill="#241f31"/>
-          <circle cx="0" cy="32" r="4.5" fill="none" stroke="${p.ec}" stroke-width="2"/>
+          <circle cx="0" cy="32" r="4.5" fill="none" stroke="${wc}" stroke-width="2"/>
         </g>`;
     }
     if (kind === 'kunai') {
@@ -120,14 +122,66 @@ const Art = (function () {
     if (kind === 'claws') {
       return `<g transform="translate(166 176)" opacity=".95">
           <g filter="url(#glow${p.uid})">
-            <path d="M4 6 Q26 -18 34 -52" stroke="${p.ec}" stroke-width="3.4" fill="none" stroke-linecap="round"/>
-            <path d="M-8 12 Q16 -14 26 -54" stroke="${p.ec}" stroke-width="3.4" fill="none" stroke-linecap="round"/>
-            <path d="M-20 16 Q4 -12 16 -56" stroke="${p.ec}" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+            <path d="M4 6 Q26 -18 34 -52" stroke="${wc}" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+            <path d="M-8 12 Q16 -14 26 -54" stroke="${wc}" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+            <path d="M-20 16 Q4 -12 16 -56" stroke="${wc}" stroke-width="3.4" fill="none" stroke-linecap="round"/>
           </g>
-          <path d="M-26 18 Q4 -6 12 -46" stroke="${p.ec}" stroke-width="6" opacity=".25" fill="none"/>
+          <path d="M-26 18 Q4 -6 12 -46" stroke="${wc}" stroke-width="6" opacity=".25" fill="none"/>
         </g>`;
     }
     return '';
+  }
+
+
+  /* ---------------- Mũ / ngoại trang đầu ---------------- */
+  function hatShape(hat, p) {
+    if (!hat) return '';
+    const c = hat.color || p.ec;
+    const dark = pct(c, -0.35);
+    const light = pct(c, 0.25);
+    switch (hat.style) {
+      case 'straw':
+        return `<g>
+          <ellipse cx="100" cy="76" rx="66" ry="10" fill="${dark}"/>
+          <ellipse cx="100" cy="74" rx="66" ry="9" fill="${c}"/>
+          <path d="M100 20 L150 72 Q100 62 50 72 Z" fill="${c}"/>
+          <path d="M100 20 L128 67 Q100 62 72 67 Z" fill="${light}" opacity=".55"/>
+          <path d="M100 24 L100 68" stroke="${dark}" stroke-width="2" opacity=".5"/>
+          <path d="M52 74 Q100 84 148 74" stroke="${dark}" stroke-width="1.6" fill="none" opacity=".6"/>
+        </g>`;
+      case 'horn':
+        return `<g>
+          <path d="M64 64 Q50 30 76 22 Q74 46 84 60 Z" fill="${c}"/>
+          <path d="M136 64 Q150 30 124 22 Q126 46 116 60 Z" fill="${c}"/>
+          <path d="M68 58 Q60 38 74 30" stroke="${light}" stroke-width="2" fill="none" opacity=".6"/>
+          <path d="M132 58 Q140 38 126 30" stroke="${light}" stroke-width="2" fill="none" opacity=".6"/>
+        </g>`;
+      case 'fox':
+        return `<g>
+          <path d="M64 54 L58 26 L88 44 Z" fill="${c}"/>
+          <path d="M136 54 L142 26 L112 44 Z" fill="${c}"/>
+          <path d="M68 50 L65 34 L82 44 Z" fill="${pct(c, -0.18)}" opacity=".85"/>
+          <path d="M132 50 L135 34 L118 44 Z" fill="${pct(c, -0.18)}" opacity=".85"/>
+        </g>`;
+      case 'crown':
+        return `<g>
+          <path d="M74 60 L80 34 L92 50 L100 28 L108 50 L120 34 L126 60 Z" fill="${c}"/>
+          <rect x="70" y="58" width="60" height="9" rx="3" fill="${dark}"/>
+          <circle cx="100" cy="44" r="3.4" fill="${light}"/>
+          <circle cx="84" cy="52" r="2.4" fill="${light}"/>
+          <circle cx="116" cy="52" r="2.4" fill="${light}"/>
+        </g>`;
+      case 'dragon':
+        return `<g>
+          <path d="M62 62 Q46 34 62 18 Q62 40 78 54 Z" fill="${c}"/>
+          <path d="M138 62 Q154 34 138 18 Q138 40 122 54 Z" fill="${c}"/>
+          <path d="M66 56 Q56 36 64 24" stroke="${light}" stroke-width="2" fill="none" opacity=".65"/>
+          <path d="M134 56 Q144 36 136 24" stroke="${light}" stroke-width="2" fill="none" opacity=".65"/>
+          <path d="M100 26 L104 34 L96 34 Z" fill="${light}" opacity=".8"/>
+        </g>`;
+      default:
+        return '';
+    }
   }
 
   /* ---------------- Mắt / mặt ---------------- */
@@ -199,6 +253,7 @@ const Art = (function () {
   function build(spec) {
     const a = spec.art || {};
     const el = ELEMENTS[spec.element] || ELEMENTS.am;
+    const look = spec.look || {};
     const o = {
       foe: !!a.foe,
       mask: a.mask !== undefined ? !!a.mask : false,
@@ -207,15 +262,20 @@ const Art = (function () {
       bulk: !!a.bulk,
       skin: a.skin || '#f0d9c8',
       hair: a.hair || 'spike',
-      weapon: a.weapon || 'katana',
+      weapon: (look.weapon && look.weapon.kind) || a.weapon || 'katana',
       scarf: a.scarf !== undefined ? !!a.scarf : true,
-      eyeStyle: a.eyeStyle || (spec.role === 'satthu' ? 'sharp' : spec.role === 'hotro' ? 'soft' : 'normal')
+      eyeStyle: a.eyeStyle || (spec.role === 'satthu' ? 'sharp' : spec.role === 'hotro' ? 'soft' : 'normal'),
+      hat: (spec.look && spec.look.hat) || null
     };
     const id = 'a' + (++uid);
     const ec = el.color;
+    const robeColor = look.robe || (o.foe ? '#2a1c33' : '#282440');
     const p = {
       uid: id,
       ec,
+      wc: (look.weapon && look.weapon.color) || ec,
+      trim: look.trim || ec,
+      hat: look.hat || null,
       ecSoft: pct(ec, -0.3),
       hair: o.foe ? '#161221' : '#1b1628',
       hairHi: pct(ec, 0.35),
@@ -223,9 +283,9 @@ const Art = (function () {
       skinShade: pct(o.skin, -0.28),
       mask: o.foe ? '#221a30' : '#262238',
       maskHi: pct(ec, 0.1),
-      robe: o.foe ? '#2a1c33' : '#282440',
-      robeDeep: '#12101c',
-      robeHi: pct(ec, -0.25),
+      robe: robeColor,
+      robeDeep: pct(robeColor, -0.6),
+      robeHi: look.trim ? pct(look.trim, -0.2) : pct(ec, -0.25),
       foeEye: '#ff5566'
     };
 
@@ -234,8 +294,8 @@ const Art = (function () {
       ${o.bulk ? `<path d="M52 150 Q34 156 24 176 L52 186 Q62 166 80 156 Z" fill="${pct(ec, -0.45)}" opacity=".85"/>
                    <path d="M148 150 Q166 156 176 176 L148 186 Q138 166 120 156 Z" fill="${pct(ec, -0.45)}" opacity=".85"/>` : ''}
       <path d="M100 132 L100 200" stroke="${p.robeHi}" stroke-width="1.4" opacity=".4"/>
-      <path d="M62 150 Q100 174 138 150" stroke="${ec}" stroke-width="2.2" opacity=".35" fill="none"/>
-      <path d="M78 136 L100 156 L122 136" stroke="${ec}" stroke-width="2" opacity=".5" fill="none"/>
+      <path d="M62 150 Q100 174 138 150" stroke="${p.trim}" stroke-width="2.2" opacity=".4" fill="none"/>
+      <path d="M78 136 L100 156 L122 136" stroke="${p.trim}" stroke-width="2" opacity=".55" fill="none"/>
     `;
 
     const headBlock = o.beast ? beastHead(p, o) : `
@@ -253,6 +313,7 @@ const Art = (function () {
       </g>
       ${eyes(p, o)}
       ${maskShape(p, o)}
+      ${hatShape(o.hat, p)}
     `;
 
     return `<svg viewBox="0 0 200 200" role="img" aria-label="${escapeAttr(spec.name || '')}">
@@ -295,8 +356,8 @@ const Art = (function () {
   ${weaponBack(o.weapon, p)}
 
   ${body}
-  ${o.scarf && !o.beast ? `<path d="M64 138 Q100 156 136 138 L144 151 Q100 174 56 151 Z" fill="${ec}" opacity=".9"/>
-    <path d="M60 150 Q42 174 54 192 L70 188 Q58 172 72 156 Z" fill="${ec}" opacity=".7"/>` : ''}
+  ${o.scarf && !o.beast ? `<path d="M64 138 Q100 156 136 138 L144 151 Q100 174 56 151 Z" fill="${p.trim}" opacity=".9"/>
+    <path d="M60 150 Q42 174 54 192 L70 188 Q58 172 72 156 Z" fill="${p.trim}" opacity=".7"/>` : ''}
 
   ${headBlock}
   ${weaponFront(o.weapon, p)}

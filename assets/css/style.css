@@ -829,3 +829,119 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 
 .chapter.is-locked { opacity: .55; }
+
+/* =========================================================================
+   HIỆU ỨNG CHIẾN ĐẤU
+   ========================================================================= */
+#fx-layer {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 30;
+}
+
+.fx-lunge-up { animation: lungeUp .38s cubic-bezier(.2, .8, .3, 1); }
+.fx-lunge-down { animation: lungeDown .38s cubic-bezier(.2, .8, .3, 1); }
+@keyframes lungeUp {
+  0% { transform: none; }
+  30% { transform: translateY(-16px) scale(1.035); }
+  100% { transform: none; }
+}
+@keyframes lungeDown {
+  0% { transform: none; }
+  30% { transform: translateY(16px) scale(1.035); }
+  100% { transform: none; }
+}
+
+.fx-shake { animation: fxShake .34s ease; }
+.fx-shake-strong { animation: fxShakeStrong .5s ease; }
+@keyframes fxShake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-6px, 2px); }
+  40% { transform: translate(5px, -3px); }
+  60% { transform: translate(-4px, 1px); }
+  80% { transform: translate(3px, -1px); }
+}
+@keyframes fxShakeStrong {
+  0%, 100% { transform: translate(0, 0); }
+  15% { transform: translate(-10px, 4px) rotate(-.4deg); }
+  35% { transform: translate(9px, -5px) rotate(.4deg); }
+  55% { transform: translate(-7px, 3px); }
+  75% { transform: translate(5px, -2px); }
+  90% { transform: translate(-3px, 1px); }
+}
+
+/* =========================================================================
+   CHUYỂN CẢNH
+   ========================================================================= */
+.veil {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .3s ease;
+  background: radial-gradient(circle at 50% 45%, #16203a 0%, #06070d 68%);
+  display: grid;
+  place-items: center;
+}
+.veil.is-on { opacity: 1; }
+.veil-mark {
+  width: 46px; height: 46px;
+  border: 2px solid rgba(255, 120, 90, .85);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: veilSpin 1s linear infinite;
+  box-shadow: 0 0 26px rgba(255, 90, 60, .45);
+}
+@keyframes veilSpin { to { transform: rotate(360deg); } }
+
+/* =========================================================================
+   SỔ TAY NHIỆM VỤ
+   ========================================================================= */
+.quest-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 16px; }
+.quest-card { padding: 18px; position: relative; overflow: hidden; }
+.quest-card.story { background: radial-gradient(600px 200px at 10% 0%, rgba(255, 90, 60, .16), transparent 70%), linear-gradient(180deg, rgba(28, 34, 58, .85), rgba(14, 18, 32, .92)); }
+.quest-ribbon { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--accent-2); margin-bottom: 10px; }
+.quest-name { font-size: 17px; margin-bottom: 4px; }
+.quest-giver { font-size: 11.5px; color: var(--muted); }
+.quest-brief { font-size: 13px; color: #c3cbdc; line-height: 1.65; margin-top: 10px; }
+.quest-story {
+  font-size: 12.5px; color: #9fb0c9; font-style: italic; line-height: 1.65;
+  margin-top: 12px; padding-left: 10px;
+  border-left: 2px solid rgba(255, 90, 60, .55);
+}
+.quest-bar { height: 8px; border-radius: 5px; background: rgba(255, 255, 255, .08); overflow: hidden; margin-top: 14px; }
+.quest-bar > span { display: block; height: 100%; width: 0; border-radius: 5px; background: linear-gradient(90deg, #ff8a5c, #ffd166); transition: width .45s ease; }
+.quest-bar.small { height: 5px; margin-top: 7px; }
+.quest-foot { display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; font-size: 12px; }
+.quest-foot .quest-reward { color: var(--gold); margin-left: auto; }
+.quest-done { display: flex; gap: 6px; margin-top: 16px; }
+.qdot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, .14); }
+.qdot.on { background: var(--accent); box-shadow: 0 0 8px rgba(255, 90, 60, .8); }
+.daily-list { display: grid; gap: 10px; margin-top: 14px; }
+.daily-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: 11px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, .03);
+}
+.daily-row.is-claimed { opacity: .45; }
+.daily-main { flex: 1; min-width: 0; }
+.daily-name { font-size: 13px; font-weight: 600; }
+.daily-sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+@media (max-width: 860px) {
+  .quest-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .tab { padding: 7px 2px; }
+  .tab span:last-child { font-size: 9px; }
+  .tab-ico svg { width: 16px; height: 16px; }
+  .quest-card { padding: 14px; }
+  .quest-name { font-size: 15px; }
+}
+
+.dmg-pop.elem { color: #7fe3ff; font-size: 11.5px; font-weight: 700; letter-spacing: .04em; text-shadow: 0 2px 8px rgba(0, 0, 0, .9); }

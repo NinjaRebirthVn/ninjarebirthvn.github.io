@@ -10,6 +10,7 @@ const Battle = (function () {
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
   let S = null;          // trạng thái trận đấu
+  let runId = 0;         // mỗi trận một mã, tránh 2 vòng lặp cùng chạy
   let ui = {};           // tham chiếu DOM từng đơn vị
   let speed = 1;
   let auto = false;
@@ -89,6 +90,9 @@ const Battle = (function () {
 
   function killUnit(u) {
     if (!u.alive) return;
+    if (S.onEvent) S.onEvent('kill', 1);
+    const r = ui[u.uid];
+    if (r) { const c = FX.centerOf(r.node); FX.burst(c.x, c.y, '#ff5b6e', { count: 24, speed: 4.4, size: 4 }); }
     u.alive = false;
     u.hp = 0;
     u.shield = 0;
@@ -217,8 +221,11 @@ const Battle = (function () {
   function pop(u, text, cls) {
     const r = ui[u.uid];
     if (!r) return;
+    const stacked = r.node.querySelectorAll('.dmg-pop').length;
     const span = document.createElement('span');
     span.className = 'dmg-pop ' + (cls || '');
+    span.style.top = (30 + Math.min(stacked, 3) * 12) + '%';
+    span.style.marginLeft = (stacked % 2 ? 22 : -10) + 'px';
     span.textContent = text;
     r.node.appendChild(span);
     setTimeout(() => span.remove(), 1000);
@@ -425,12 +432,21 @@ const Battle = (function () {
     const friends = aliveOf(actor.side);
     if (!foes.length) return;
 
+    const elId = skill.element || actor.element;
+    const color = (ELEMENTS[elId] || ELEMENTS.am).color;
+    const actorNode = ui[actor.uid] ? ui[actor.uid].node : null;
+
     if (skill.ult) {
       actor.nou = 0;
+      S.onEvent('ult', 1);
       flashSkill(skill.name);
-      await wait(260);
+      FX.ultimate(actorNode, color);
+      FX.shake(document.getElementById('battle-field'), true);
+      Sfx.play('ult');
+      await wait(430);
     } else {
       actor.chakra -= skill.cost || 0;
+      FX.cast(actorNode, color);
     }
 
     if (skill.selfHpCost) {
@@ -441,28 +457,38 @@ const Battle = (function () {
 
     log(`<b>${actor.name}</b> dùng <b>${skill.name}</b>.`);
 
-    if (skill.heal) {
-      const targets = skill.target === 'allies' ? friends : skill.target === 'self' ? [actor] : [target || friends[0]];
+    const isSupport = skill.target === 'allies' || skill.target === 'ally' || skill.target === 'self';
+
+    /* ---- kỹ năng hỗ trợ: hồi máu / tẩy hiệu ứng ---- */
+    if (skill.heal && isSupport) {
+      const targets = skill.target === 'allies'
+        ? friends
+        : skill.target === 'self'
+          ? [actor]
+          : [target && target.side === actor.side && target.alive ? target : friends[0]];
       const amount = Math.round(statOf(actor, 'atk') * skill.heal);
+      FX.cast(actorNode, '#7ef0b0');
       for (const t of targets) {
         if (!t || !t.alive) continue;
         const got = healUnit(t, amount);
         pop(t, `+${got}`, 'heal');
+        FX.healFx(ui[t.uid] ? ui[t.uid].node : null);
         syncUnit(t);
+        Sfx.play('heal');
+        await wait(150);
       }
-      await wait(targets.length > 1 ? 380 : 200);
       if (skill.fx) {
         for (const t of targets) for (const eff of skill.fx) applyEffect(t, eff, actor);
-        syncAll();
       }
-      if (skill.healTarget === 'lowest') {
-        const low = [...friends].sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
-        if (low) { const got = healUnit(low, Math.round(statOf(actor, 'atk') * skill.heal)); pop(low, `+${got}`, 'heal'); syncUnit(low); }
-      }
+      syncAll();
+      await wait(160);
       return;
     }
 
+    /* ---- kỹ năng tấn công ---- */
     const hits = skill.hits || 1;
+    const ranged = ['thuy', 'loi', 'phong', 'am', 'moc'].indexOf(elId) >= 0;
+
     for (let i = 0; i < hits; i++) {
       let list;
       if (skill.target === 'all') list = foes;
@@ -472,19 +498,40 @@ const Battle = (function () {
 
       for (const t of list) {
         if (!t || !t.alive) continue;
+        const targetNode = ui[t.uid] ? ui[t.uid].node : null;
+        FX.lunge(actorNode, actor.side === 'ally' ? 'up' : 'down');
+        if (ranged) await FX.shoot(actorNode, targetNode, color, { dur: 0.2 });
+        else { FX.slash(actorNode, targetNode, color); await wait(110); }
+
         const { dmg, crit, elem } = computeDamage(actor, t, skill);
         takeDamage(t, dmg);
+        FX.hit(targetNode, color, { crit });
+        Sfx.play(crit ? 'crit' : 'hit');
         pop(t, (crit ? '✦ ' : '') + dmg, crit ? 'crit' : '');
         syncUnit(t);
-        if (elem > 1) pop(t, 'Khắc hệ', 'miss');
+        if (elem > 1) pop(t, 'Khắc hệ', 'elem');
         if (skill.lifesteal) {
           const got = healUnit(actor, Math.round(dmg * skill.lifesteal));
-          if (got > 0) pop(actor, `+${got}`, 'heal');
+          if (got > 0) { pop(actor, `+${got}`, 'heal'); FX.healFx(actorNode); }
         }
+        await wait(95);
       }
-      if (hits > 1) await wait(180);
+      if (hits > 1) await wait(110);
     }
     syncAll();
+
+    /* ---- đòn đánh kèm hồi máu cho đồng đội yếu nhất (Mộc Tiễn) ---- */
+    if (skill.heal && !isSupport) {
+      const low = [...friends].sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
+      if (low && low.alive) {
+        const got = healUnit(low, Math.round(statOf(actor, 'atk') * skill.heal));
+        if (got > 0) {
+          pop(low, `+${got}`, 'heal');
+          FX.healFx(ui[low.uid] ? ui[low.uid].node : null);
+          syncUnit(low);
+        }
+      }
+    }
 
     if (skill.fx) {
       const fxTargets = skill.target === 'self'
@@ -499,20 +546,22 @@ const Battle = (function () {
         for (const eff of skill.fx) applyEffect(t, eff, actor);
       }
       syncAll();
-      await wait(120);
+      await wait(110);
     }
-    await wait(200);
+    await wait(150);
   }
 
   async function doItem(actor, item, target) {
     Game.consumeItem(item.id);
+    S.onEvent('item', 1);
+    FX.cast(ui[actor.uid] ? ui[actor.uid].node : null, '#7ef0b0');
     const stock = S.items.find((i) => i.id === item.id);
     if (stock) stock.count = Math.max(0, stock.count - 1);
     log(`<b>${actor.name}</b> dùng <b>${item.name}</b>.`, 'log-sys');
     const allies = aliveOf(actor.side);
     if (item.kind === 'heal') {
       const t = target && target.alive ? target : allies.sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
-      if (t) { const got = healUnit(t, Math.round(t.maxHp * item.value)); pop(t, `+${got}`, 'heal'); syncUnit(t); }
+      if (t) { const got = healUnit(t, Math.round(t.maxHp * item.value)); pop(t, `+${got}`, 'heal'); FX.healFx(ui[t.uid] ? ui[t.uid].node : null); syncUnit(t); }
     } else if (item.kind === 'chakra') {
       const t = target && target.alive ? target : actor;
       t.chakra = Math.min(t.maxChakra, t.chakra + item.value);
@@ -601,9 +650,9 @@ const Battle = (function () {
   }
 
   /* ---------------- vòng lặp ---------------- */
-  async function loop() {
+  async function loop(myRun) {
     S.turn = 0;
-    while (!destroyed) {
+    while (!destroyed && myRun === runId) {
       const end = checkEnd();
       if (end) return end;
       const actor = nextActor();
@@ -624,6 +673,8 @@ const Battle = (function () {
         choice = aiChoose(actor);
       } else {
         choice = await playerTurn(actor);
+        if (myRun !== runId) return null;
+        renderActions(null);
       }
       if (destroyed) return null;
       if (!choice) { endTurn(actor); continue; }
@@ -643,6 +694,7 @@ const Battle = (function () {
   /* ---------------- API ---------------- */
   function start(config) {
     destroyed = false;
+    const myRun = ++runId;
     speed = 1;
     auto = false;
     ui = {};
@@ -653,6 +705,7 @@ const Battle = (function () {
       kicker: config.kicker || 'Nhiệm vụ',
       units: [...enemies, ...allies],
       items: config.items || [],
+      onEvent: config.onEvent || function () {},
       pending: null,
       activeUid: null,
       turn: 0
@@ -665,6 +718,7 @@ const Battle = (function () {
     $('btn-auto').classList.remove('is-on');
     $('btn-speed').textContent = 'Tốc độ: ×1';
 
+    FX.clear();
     buildField();
     renderActions(null);
     $('screen-hub').classList.remove('is-active');
@@ -672,11 +726,19 @@ const Battle = (function () {
     window.scrollTo(0, 0);
 
     log(`<span class="log-sys">${config.intro || 'Trận chiến bắt đầu!'}</span>`);
+    setTimeout(() => {
+      S.units.forEach((u) => {
+        const r = ui[u.uid];
+        if (!r) return;
+        const c = FX.centerOf(r.node);
+        FX.burst(c.x, c.y, (ELEMENTS[u.element] || ELEMENTS.am).color, { count: 6, speed: 1.4, up: 1.4, gravity: -0.01 });
+      });
+    }, 120);
     if (enemies.some((e) => e.boss)) log('Kẻ địch mạnh xuất hiện — hãy cẩn thận.', 'log-sys');
 
-    loop()
+    loop(myRun)
       .then((result) => {
-        if (destroyed || !result) return;
+        if (destroyed || myRun !== runId || !result) return;
         finish(result, config);
       })
       .catch((err) => {
@@ -733,7 +795,7 @@ const Battle = (function () {
 
   return {
     start,
-    stop() { destroyed = true; S = null; },
+    stop() { destroyed = true; runId++; S = null; FX.clear(); },
     get auto() { return auto; },
     get state() { return S; }
   };

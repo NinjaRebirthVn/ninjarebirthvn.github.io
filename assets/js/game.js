@@ -51,6 +51,11 @@ const Game = (function () {
       cleared: {},
       arena: { rating: 1000, wins: 0, losses: 0 },
       settings: { sound: true },
+      stats: { wins: 0, kills: 0, ults: 0, arenaWins: 0, itemsUsed: 0, stagesCleared: 0, equips: 0 },
+      daily: null,
+      story: { index: 0, done: [] },
+      cosmetics: {},
+      unlocked: [],
       createdAt: Date.now()
     };
     return st;
@@ -67,6 +72,15 @@ const Game = (function () {
       if (!raw) return null;
       const st = JSON.parse(raw);
       if (!st || !st.roster || !st.roster.length) return null;
+      // nâng cấp dữ liệu lưu cũ
+      st.settings = st.settings || { sound: true };
+      st.stats = st.stats || { wins: 0, kills: 0, ults: 0, arenaWins: 0, itemsUsed: 0, stagesCleared: 0, equips: 0 };
+      st.story = st.story || { index: 0, done: [] };
+      st.cosmetics = st.cosmetics || {};
+      st.unlocked = st.unlocked || [];
+      st.arena = st.arena || { rating: 1000, wins: 0, losses: 0 };
+      st.daily = st.daily || null;
+      st.roster.forEach((r) => { r.equip = r.equip || { weapon: null, armor: null, charm: null }; });
       return st;
     } catch (e) { return null; }
   }
@@ -212,6 +226,7 @@ const Game = (function () {
     }
     entry.equip[tpl.slot] = inst.uid;
     inst.holder = charId;
+    bump('equips', 1);
   }
 
   function unequip(charId, slot) {
@@ -296,6 +311,7 @@ const Game = (function () {
 
   function showHub() {
     showScreen('screen-hub');
+    ensureDaily();
     renderTopbar();
     renderPanel(currentPanel);
   }
@@ -308,9 +324,11 @@ const Game = (function () {
   }
 
   function renderPanel(name) {
+    if (!state) return;
     if (name === 'team') renderTeam();
     else if (name === 'campaign') renderCampaign();
     else if (name === 'roster') renderRoster();
+    else if (name === 'quest') renderQuests();
     else if (name === 'shop') renderShop();
     else if (name === 'arena') renderArena();
     renderTopbar();
@@ -428,7 +446,7 @@ const Game = (function () {
       const c = CHAR_BY_ID[entry.id];
       const s = statsFor(entry);
       slots.push(`<div class="slot" data-slot="${i}" data-char="${entry.id}">
-        <div class="slot-art">${Art.portrait(c)}</div>
+        <div class="slot-art">${portraitOf(entry.id)}</div>
         <div class="slot-body">
           <div class="slot-top">
             <div class="slot-name">${c.name}<small>Lv ${entry.level}</small></div>
@@ -603,7 +621,7 @@ const Game = (function () {
           const inTeam = !!entry && state.team.includes(c.id);
           return `<div class="char-card ${entry ? '' : 'is-locked'} ${inTeam ? 'is-in-team' : ''}" data-char="${c.id}">
             ${inTeam ? '<span class="team-flag">TRONG ĐỘI</span>' : ''}
-            <div class="char-art">${Art.portrait(c)}</div>
+            <div class="char-art">${portraitOf(c.id)}</div>
             <div class="char-meta">
               <strong>${c.name}</strong>
               <span class="char-lv">${entry ? 'Lv ' + entry.level : '???'}</span>
@@ -643,6 +661,15 @@ const Game = (function () {
       </div>`;
     }).join('');
 
+    const cosmeticBlock = ['outfit', 'hat', 'weaponSkin'].map((slot) => {
+      const id = (state.cosmetics[charId] || {})[slot];
+      const cos = id ? COSMETIC_BY_ID[id] : null;
+      return `<div class="equip-slot" data-cos-slot="${slot}">
+        <span>${COSMETIC_SLOTS[slot]}</span>
+        <b style="color:${cos ? '#dfe6f4' : '#8b95ad'}">${cos ? cos.name : '— Mặc định —'}</b>
+      </div>`;
+    }).join('');
+
     const skills = [...c.skills, c.ult].map((sid, i) => {
       const sk = SKILLS[sid];
       if (!sk) return '';
@@ -657,7 +684,7 @@ const Game = (function () {
       title: c.name + ' · ' + c.title,
       body: `
         <div class="detail-head">
-          <div class="detail-art">${Art.portrait(c)}</div>
+          <div class="detail-art">${portraitOf(c.id)}</div>
           <div style="flex:1;min-width:0">
             <div class="detail-name">${c.name}</div>
             <div class="detail-title">${ROLES[c.role].name} · Cấp ${entry.level}</div>
@@ -683,6 +710,8 @@ const Game = (function () {
           <div class="stat-box"><span>Chiến lực</span><b>${fmt(powerOf(entry))}</b></div>
         </div>
         <div class="equip-row">${equipBlock}</div>
+        <h4 style="margin-top:16px;font-size:13px">Ngoại trang</h4>
+        <div class="equip-row">${cosmeticBlock}</div>
         <h4 style="margin-top:16px;font-size:13px">Kỹ năng</h4>
         <div class="skill-list">${skills}</div>`,
       actions: [
@@ -690,8 +719,11 @@ const Game = (function () {
       ]
     });
 
-    back.querySelectorAll('.equip-slot').forEach((node) => {
+    back.querySelectorAll('.equip-slot[data-slot]').forEach((node) => {
       node.addEventListener('click', () => { modalClose(); openEquipPicker(charId, node.dataset.slot); });
+    });
+    back.querySelectorAll('.equip-slot[data-cos-slot]').forEach((node) => {
+      node.addEventListener('click', () => { modalClose(); openCosmeticPicker(charId, node.dataset.cosSlot); });
     });
   }
 
@@ -718,7 +750,7 @@ const Game = (function () {
         const c = CHAR_BY_ID[r.id];
         return `<div class="equip-opt" data-char="${r.id}">
           <div style="display:flex;gap:10px;align-items:center">
-            <div style="width:44px;flex:0 0 auto;border-radius:8px;overflow:hidden">${Art.portrait(c)}</div>
+            <div style="width:44px;flex:0 0 auto;border-radius:8px;overflow:hidden">${portraitOf(r.id)}</div>
             <div><div class="eq-name">${c.name} <span class="muted" style="font-size:11px">Lv ${r.level}</span></div>
               <div class="eq-stats">${ROLES[c.role].name} · Chiến lực ${fmt(powerOf(r))}</div></div>
           </div>
@@ -835,6 +867,25 @@ const Game = (function () {
         }).join('')}
       </div>
 
+      <h3 style="font-size:15px;margin:0 0 10px">Ngoại trang</h3>
+      <div class="shop-grid" style="margin-bottom:20px">
+        ${[...OUTFITS, ...HATS, ...WEAPON_SKINS].filter((c) => c.price > 0).map((c) => {
+          const owned = state.unlocked.indexOf(c.id) >= 0;
+          return `<div class="card shop-card">
+            <div class="shop-top">
+              <h4>${c.name}</h4>
+              <span class="tag">${COSMETIC_SLOTS[c.slot]}</span>
+            </div>
+            <p>${c.desc || ''}</p>
+            <div class="row">
+              <span class="price">${owned ? 'Đã sở hữu' : fmt(c.price) + ' ◆'}</span>
+              <span class="spacer"></span>
+              <button class="btn btn-sm ${owned ? '' : 'btn-primary'}" data-buy-cos="${c.id}" ${owned ? 'disabled' : ''}>${owned ? 'Đã có' : 'Mua'}</button>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+
       <h3 style="font-size:15px;margin:0 0 10px">Vật phẩm</h3>
       <div class="shop-grid">
         ${items.map((it) => `
@@ -856,6 +907,7 @@ const Game = (function () {
     recruitBtn.addEventListener('click', recruit);
     host.querySelectorAll('[data-buy-gear]').forEach((b) => b.addEventListener('click', () => buyGear(+b.dataset.buyGear)));
     host.querySelectorAll('[data-buy-item]').forEach((b) => b.addEventListener('click', () => buyItem(b.dataset.buyItem)));
+    host.querySelectorAll('[data-buy-cos]').forEach((b) => b.addEventListener('click', () => buyCosmetic(b.dataset.buyCos)));
   }
 
   function buyGear(index) {
@@ -866,11 +918,24 @@ const Game = (function () {
     const inst = makeGear(s.tid, 0);
     state.gear.push(inst);
     shopStock.splice(index, 1);
-    refreshStock();
     save();
     Sfx.play('coin');
     toast('Đã mua ' + EQUIP_BY_ID[s.tid].name + '. Trang bị nằm trong túi đồ.', 'ok');
     renderShop();
+  }
+
+  function buyCosmetic(id) {
+    const c = COSMETIC_BY_ID[id];
+    if (!c || !c.price) return;
+    if (state.unlocked.indexOf(id) >= 0) { toast('Bạn đã sở hữu món này.', 'err'); return; }
+    if (state.gold < c.price) { toast('Không đủ linh thạch.', 'err'); return; }
+    state.gold -= c.price;
+    unlockCosmetic(id);
+    save();
+    Sfx.play('coin');
+    toast('Đã mở khoá ' + c.name + '. Vào Nhẫn giả để mặc.', 'ok');
+    renderShop();
+    renderTopbar();
   }
 
   function buyItem(id) {
@@ -902,7 +967,7 @@ const Game = (function () {
     modal({
       title: 'Chiêu mộ thành công',
       body: `<div style="text-align:center">
-        <div style="width:150px;margin:0 auto 12px;border-radius:14px;overflow:hidden">${Art.portrait(c)}</div>
+        <div style="width:150px;margin:0 auto 12px;border-radius:14px;overflow:hidden">${portraitOf(got)}</div>
         <div class="detail-name" style="font-size:19px">${c.name}</div>
         <div class="detail-title">${c.title}</div>
         <div class="detail-tags" style="justify-content:center">${Art.elementBadge(c.element)}<span class="tag gold">${'★'.repeat(c.rarity)}</span></div>
@@ -985,6 +1050,289 @@ const Game = (function () {
     }));
   }
 
+
+  /* =====================================================================
+     NGOẠI TRANG
+     ===================================================================== */
+  function unlockedCosmetics(slot) {
+    return [...OUTFITS, ...HATS, ...WEAPON_SKINS].filter((c) => c.slot === slot && state.unlocked.indexOf(c.id) >= 0);
+  }
+
+  function cosmeticOf(id) { return COSMETIC_BY_ID[id] || null; }
+
+  function lookOf(charId) {
+    const cos = (state.cosmetics && state.cosmetics[charId]) || {};
+    const fit = cos.outfit ? cosmeticOf(cos.outfit) : null;
+    const hat = cos.hat ? cosmeticOf(cos.hat) : null;
+    const wp = cos.weaponSkin ? cosmeticOf(cos.weaponSkin) : null;
+    return {
+      robe: fit ? fit.robe : null,
+      trim: fit ? fit.trim : null,
+      hat: hat ? { style: hat.style, color: hat.color } : null,
+      weapon: wp ? { kind: wp.kind, color: wp.color } : null
+    };
+  }
+
+  function portraitOf(charId) {
+    const c = CHAR_BY_ID[charId];
+    if (!c) return '';
+    return Art.portrait({ ...c, look: lookOf(charId) });
+  }
+
+  function unlockCosmetic(id) {
+    if (!id || !COSMETIC_BY_ID[id]) return false;
+    if (state.unlocked.indexOf(id) >= 0) return false;
+    state.unlocked.push(id);
+    return true;
+  }
+
+  function wearCosmetic(charId, slot, id) {
+    state.cosmetics[charId] = state.cosmetics[charId] || {};
+    if (!id) delete state.cosmetics[charId][slot];
+    else state.cosmetics[charId][slot] = id;
+    save();
+    renderPanel('roster');
+  }
+
+  function openCosmeticPicker(charId, slot) {
+    const list = unlockedCosmetics(slot);
+    const cur = (state.cosmetics[charId] || {})[slot];
+    const body = list.length
+      ? `<div class="equip-pick">
+          ${list.map((c) => `
+            <div class="equip-opt" data-cos="${c.id}">
+              <div>
+                <div class="eq-name">${c.name} ${cur === c.id ? '<span class="tag jade">Đang dùng</span>' : ''}</div>
+                <div class="eq-stats">${c.desc || ''}</div>
+              </div>
+              <span class="tag">${c.slot === 'outfit' ? 'Trang phục' : c.slot === 'hat' ? 'Mũ' : 'Vũ khí'}</span>
+            </div>`).join('')}
+          ${cur ? '<div class="equip-opt" data-cos=""><div><div class="eq-name">Bỏ ngoại trang</div><div class="eq-stats">Trở về trang phục mặc định</div></div><span class="tag">Gỡ</span></div>' : ''}
+        </div>`
+      : `<p class="empty">Chưa mở khoá ${COSMETIC_SLOTS[slot].toLowerCase()} nào.<br>Xem mục <b>Sổ tay</b> (thưởng nhiệm vụ) hoặc <b>Cửa hàng</b>.</p>`;
+
+    const back = modal({ title: COSMETIC_SLOTS[slot] + ' của ' + CHAR_BY_ID[charId].name, body, actions: [{ label: 'Đóng', cls: 'btn-ghost' }] });
+    back.querySelectorAll('[data-cos]').forEach((node) => {
+      node.addEventListener('click', () => {
+        wearCosmetic(charId, slot, node.dataset.cos || null);
+        modalClose();
+        openCharDetail(charId);
+      });
+    });
+  }
+
+  /* =====================================================================
+     NHIỆM VỤ
+     ===================================================================== */
+  const STAT_KEYS = { wins: 0, kills: 0, ults: 0, arenaWins: 0, itemsUsed: 0, stagesCleared: 0, equips: 0 };
+  // battle.js phát sự kiện dạng ngắn (kill/ult/item) — quy về khoá thống kê.
+  const STAT_ALIAS = { kill: 'kills', ult: 'ults', item: 'itemsUsed' };
+
+  function bump(key, n) {
+    if (!state) return;
+    key = STAT_ALIAS[key] || key;
+    if (!(key in STAT_KEYS)) return;
+    state.stats[key] = (state.stats[key] || 0) + (n || 1);
+  }
+
+  function todayKey() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function ensureDaily() {
+    if (!state) return;
+    const today = todayKey();
+    if (state.daily && state.daily.date === today) return;
+    const seed = [...today].reduce((a, ch) => a + ch.charCodeAt(0), 0);
+    const pool = DAILY_POOL.slice();
+    const picks = [];
+    for (let i = 0; i < 3 && pool.length; i++) {
+      const idx = (seed * (i + 3) + i * 7) % pool.length;
+      picks.push(pool.splice(idx, 1)[0].id);
+    }
+    state.daily = {
+      date: today,
+      base: { ...state.stats },
+      quests: picks.map((id) => ({ id, claimed: false }))
+    };
+    save();
+  }
+
+  function dailyInfo(entry) {
+    const tpl = DAILY_POOL.find((q) => q.id === entry.id);
+    if (!tpl) return null;
+    const base = (state.daily && state.daily.base && state.daily.base[tpl.stat]) || 0;
+    const cur = state.stats[tpl.stat] || 0;
+    const progress = Math.max(0, cur - base);
+    return { tpl, progress: Math.min(progress, tpl.target), raw: progress, claimed: entry.claimed, done: progress >= tpl.target };
+  }
+
+  function storyValue(goal) {
+    if (!goal) return 0;
+    switch (goal.kind) {
+      case 'stage': return stageCleared(goal.value) ? 1 : 0;
+      case 'chapter': {
+        const ch = CHAPTERS.find((c) => c.id === goal.value);
+        return ch && ch.stages.every((st) => stageCleared(st.id)) ? 1 : 0;
+      }
+      case 'recruit': return state.roster.length;
+      case 'level': return topLevel();
+      case 'stat': return state.stats[goal.key] || 0;
+      default: return 0;
+    }
+  }
+
+  function storyQuest() { return STORY_QUESTS[state.story.index] || null; }
+
+  function storyState() {
+    const q = storyQuest();
+    if (!q) return { q: null, value: 0, target: 0, done: true };
+    const target = q.goal.kind === 'stage' || q.goal.kind === 'chapter' ? 1 : q.goal.value;
+    const value = Math.min(storyValue(q.goal), target);
+    return { q, value, target, done: value >= target };
+  }
+
+  function grantReward(reward) {
+    const lines = [];
+    if (!reward) return lines;
+    if (reward.gold) { state.gold += reward.gold; lines.push('+' + fmt(reward.gold) + ' linh thạch'); }
+    if (reward.items) {
+      Object.entries(reward.items).forEach(([id, n]) => {
+        state.inventory[id] = (state.inventory[id] || 0) + n;
+        lines.push(`+${n} ${ITEMS[id] ? ITEMS[id].name : id}`);
+      });
+    }
+    if (reward.cosmetic && unlockCosmetic(reward.cosmetic)) lines.push('Mở khoá: ' + COSMETIC_BY_ID[reward.cosmetic].name);
+    if (reward.cosmetic2 && unlockCosmetic(reward.cosmetic2)) lines.push('Mở khoá: ' + COSMETIC_BY_ID[reward.cosmetic2].name);
+    return lines;
+  }
+
+  function claimStory() {
+    const st = storyState();
+    if (!st.q || !st.done) return;
+    const lines = grantReward(st.q.reward);
+    state.story.done.push(st.q.id);
+    state.story.index += 1;
+    save();
+    Sfx.play('win');
+    modal({
+      title: 'Hoàn thành: ' + st.q.name,
+      body: `<p class="muted" style="font-size:13px;line-height:1.75">${st.q.story}</p>
+        <div class="mini-list" style="margin-top:14px">${lines.map((l) => `<div class="row"><span>${l}</span></div>`).join('')}</div>`,
+      actions: [{ label: 'Nhận', cls: 'btn-primary', onClick: () => { modalClose(); renderPanel('quest'); renderTopbar(); } }]
+    });
+  }
+
+  function claimDaily(questId) {
+    const entry = state.daily.quests.find((q) => q.id === questId);
+    if (!entry || entry.claimed) return;
+    const info = dailyInfo(entry);
+    if (!info || !info.done) return;
+    entry.claimed = true;
+    const lines = grantReward(info.tpl.reward);
+    save();
+    Sfx.play('coin');
+    toast('Nhận thưởng: ' + lines.join(' · '), 'ok');
+    renderPanel('quest');
+    renderTopbar();
+  }
+
+  function claimableCount() {
+    if (!state) return 0;
+    let n = 0;
+    const st = storyState();
+    if (st.q && st.done) n++;
+    if (state.daily) {
+      state.daily.quests.forEach((entry) => {
+        const info = dailyInfo(entry);
+        if (info && info.done && !entry.claimed) n++;
+      });
+    }
+    return n;
+  }
+
+  function questHint() {
+    const n = claimableCount();
+    if (n > 0) return `Có ${n} nhiệm vụ đã hoàn thành, vào Sổ tay để nhận thưởng.`;
+    return '';
+  }
+
+  function renderQuests() {
+    ensureDaily();
+    const host = document.getElementById('panel-quest');
+    const st = storyState();
+    const pctStory = st.target ? Math.round((st.value / st.target) * 100) : 100;
+    const dailyDefs = state.daily.quests.map((entry) => ({ entry, info: dailyInfo(entry) })).filter((x) => x.info);
+
+    host.innerHTML = `
+      <div class="panel-head">
+        <div>
+          <h2>Sổ tay nhiệm vụ</h2>
+          <p>Chuỗi cốt truyện Hắc Vũ và việc cần làm mỗi ngày.</p>
+        </div>
+        <span class="tag ${claimableCount() ? 'gold' : ''}">${claimableCount()} phần thưởng chờ nhận</span>
+      </div>
+
+      <div class="quest-grid">
+        <div class="card quest-card story">
+          <div class="quest-ribbon">Cốt truyện · ${Math.min(state.story.index + 1, STORY_QUESTS.length)}/${STORY_QUESTS.length}</div>
+          ${st.q ? `
+            <h3 class="quest-name">${st.q.name}</h3>
+            <p class="quest-giver">${st.q.giver}</p>
+            <p class="quest-brief">${st.q.brief}</p>
+            <p class="quest-story">${st.q.story}</p>
+            <div class="quest-bar"><span style="width:${pctStory}%"></span></div>
+            <div class="quest-foot">
+              <span class="muted">${st.value}/${st.target}</span>
+              <span class="quest-reward">${st.q.reward.gold ? '◆ ' + fmt(st.q.reward.gold) : ''}${st.q.reward.cosmetic ? ' · ' + COSMETIC_BY_ID[st.q.reward.cosmetic].name : ''}</span>
+              <button class="btn btn-sm ${st.done ? 'btn-gold' : ''}" id="btn-claim-story" ${st.done ? '' : 'disabled'}>${st.done ? 'Nhận thưởng' : 'Chưa xong'}</button>
+            </div>` : `
+            <h3 class="quest-name">Chuỗi cốt truyện đã khép lại</h3>
+            <p class="quest-brief">Bạn đã đi hết con đường của Hắc Vũ. Đấu trường vẫn còn đó để thử sức.</p>`}
+          <div class="quest-done">
+            ${STORY_QUESTS.map((q, i) => `<span class="qdot ${i < state.story.index ? 'on' : ''}" title="${q.name}"></span>`).join('')}
+          </div>
+        </div>
+
+        <div class="card quest-card daily">
+          <div class="quest-ribbon">Hằng ngày · ${state.daily.date.split('-').reverse().join('/')}</div>
+          <p class="quest-brief">Làm mới sau nửa đêm. Tiến độ tính từ lúc mở game hôm nay.</p>
+          <div class="daily-list">
+            ${dailyDefs.map(({ entry, info }) => `
+              <div class="daily-row ${entry.claimed ? 'is-claimed' : ''}">
+                <div class="daily-main">
+                  <div class="daily-name">${info.tpl.name}</div>
+                  <div class="quest-bar small"><span style="width:${Math.round(info.progress / info.tpl.target * 100)}%"></span></div>
+                  <div class="daily-sub">${info.progress}/${info.tpl.target} · thưởng ${info.tpl.reward.gold ? '◆ ' + info.tpl.reward.gold : ''}${info.tpl.reward.items ? ' + vật phẩm' : ''}</div>
+                </div>
+                <button class="btn btn-sm ${info.done && !entry.claimed ? 'btn-gold' : ''}" data-claim="${entry.id}" ${info.done && !entry.claimed ? '' : 'disabled'}>
+                  ${entry.claimed ? 'Đã nhận' : info.done ? 'Nhận' : 'Đang làm'}
+                </button>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>`;
+
+    const claimBtn = host.querySelector('#btn-claim-story');
+    if (claimBtn) claimBtn.addEventListener('click', claimStory);
+    host.querySelectorAll('[data-claim]').forEach((b) => b.addEventListener('click', () => claimDaily(b.dataset.claim)));
+  }
+
+  /* =====================================================================
+     CHUYỂN CẢNH
+     ===================================================================== */
+  function veil(cb) {
+    const node = document.getElementById('veil');
+    if (!node) { cb(); return; }
+    node.classList.add('is-on');
+    setTimeout(() => {
+      cb();
+      window.scrollTo(0, 0);
+      node.classList.remove('is-on');
+    }, 300);
+  }
+
   /* =====================================================================
      TRẬN ĐẤU
      ===================================================================== */
@@ -993,7 +1341,7 @@ const Game = (function () {
       const c = CHAR_BY_ID[e.id];
       return {
         name: c.name, element: c.element, role: c.role, level: e.level,
-        skills: c.skills, ult: c.ult, portrait: Art.portrait(c), stats: statsFor(e)
+        skills: c.skills, ult: c.ult, portrait: portraitOf(e.id), stats: statsFor(e)
       };
     });
   }
@@ -1030,19 +1378,20 @@ const Game = (function () {
     const enemies = enemySpecs(stage.enemies);
     Sfx.play('battle');
     Battle.stop();
-    Battle.start({
+    veil(() => Battle.start({
       title: stage.name,
       kicker: `Chương ${chapter.id} · ${chapter.name}`,
       subtitle: `Lv ${stage.lv} · ${enemies.length} kẻ địch`,
       intro: `Trận chiến tại ${stage.name} bắt đầu!`,
       allies, enemies,
       items: battleItems(),
+      onEvent: (type, n) => bump(type, n),
       onEnd: (win) => {
         Battle.stop();
         if (win) winStage(chapter, stage);
         else loseBattle('Đội hình của bạn đã thất thủ. Hãy luyện tập và thử lại!');
       }
-    });
+    }));
   }
 
   function launchArena(opp) {
@@ -1059,17 +1408,20 @@ const Game = (function () {
     });
     Sfx.play('battle');
     Battle.stop();
-    Battle.start({
+    veil(() => Battle.start({
       title: opp.name,
       kicker: 'Đấu trường',
       subtitle: `Lv ${opp.lv} · Chiến lực ${fmt(opp.power)}`,
       intro: `Thách đấu ${opp.name}!`,
       allies, enemies,
       items: battleItems(),
+      onEvent: (type, n) => bump(type, n),
       onEnd: (win) => {
         Battle.stop();
         if (win) {
           state.arena.wins++;
+          bump('arenaWins', 1);
+          bump('wins', 1);
           state.arena.rating = Math.max(0, state.arena.rating + 25);
           const gold = 130, xp = 70;
           state.gold += gold;
@@ -1088,7 +1440,7 @@ const Game = (function () {
           loseBattle('Bạn đã thua trận đấu trường. -12 điểm xếp hạng.');
         }
       }
-    });
+    }));
   }
 
   function winStage(chapter, stage) {
@@ -1132,12 +1484,16 @@ const Game = (function () {
       }
     }
 
+    bump('wins', 1);
+    bump('stagesCleared', 1);
     save();
     Sfx.play('win');
+    const hint = questHint() || (storyState().done ? 'Nhiệm vụ cốt truyện đã hoàn thành — vào Sổ tay nhận thưởng.' : '');
     showResult({
       title: 'Chiến thắng',
       lines,
       note: unlocked ? `${unlocked.name} đã gia nhập gia tộc Hắc Vũ!` : (first ? 'Đã mở khoá nhiệm vụ tiếp theo.' : 'Bạn có thể cày lại nhiệm vụ này để lấy thêm tài nguyên.'),
+      extra: hint,
       char: unlocked
     });
   }
@@ -1163,6 +1519,7 @@ const Game = (function () {
         ${opts.lines.map((l) => `<div class="row"><span style="color:#a9b4c9">${l}</span></div>`).join('')}
       </div>
       ${opts.note ? `<p class="muted" style="font-size:12.5px;margin-top:12px;line-height:1.6">${opts.note}</p>` : ''}
+      ${opts.extra ? `<p style="font-size:12.5px;margin-top:8px;line-height:1.6;color:#ffd166">${opts.extra}</p>` : ''}
       ${opts.char ? `<div style="width:120px;margin:14px auto 0;border-radius:12px;overflow:hidden">${Art.portrait(opts.char)}</div>` : ''}
     </div>`;
     modal({
@@ -1252,7 +1609,7 @@ const Game = (function () {
         const act = node.dataset.act;
         if (act === 'sound') {
           Sfx.toggle();
-          if (state) { state.settings.sound = Sfx.enabled; save(); }
+          if (state) { state.settings = state.settings || { sound: true }; state.settings.sound = Sfx.enabled; save(); }
           openMenu();
         } else if (act === 'guide') { modalClose(); openGuide(); }
         else if (act === 'reset') {
@@ -1306,6 +1663,7 @@ const Game = (function () {
     inited = true;
     const saved = load();
     Sfx.enabled = saved && saved.settings ? saved.settings.sound !== false : true;
+    if (window.FX && typeof FX.init === 'function') FX.init();
     bind();
     showTitle();
   }

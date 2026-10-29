@@ -265,13 +265,13 @@ const ENEMIES = {
               base:{ hp:900, atk:120, def:48, spd:104, crit:12 }, skills:['e_slash','e_heavy','e_bite'] },
 
   son_vuong:{ name:'Sơn Vương', element:'tho', boss:true, art:{ hair:'spike', mask:true, weapon:'staff', foe:true, bulk:true, skin:'#b88a5a' },
-              base:{ hp:1900, atk:104, def:58, spd:82, crit:5 }, skills:['e_heavy','e_sweep','e_roar'] },
+              base:{ hp:1450, atk:112, def:58, spd:82, crit:5 }, skills:['e_heavy','e_sweep','e_roar'] },
   huyet_te: { name:'Huyết Tế Sư', element:'am', boss:true, art:{ hair:'hood', mask:true, weapon:'staff', foe:true, skin:'#c9a0c0' },
-              base:{ hp:2300, atk:112, def:54, spd:90, crit:8 }, skills:['e_sweep','e_bite','e_heal'] },
+              base:{ hp:1800, atk:120, def:54, spd:90, crit:8 }, skills:['e_sweep','e_bite','e_heal'] },
   ve_si_ngu_hanh:{ name:'Ngũ Hành Vệ Sĩ', element:'loi', boss:true, art:{ hair:'none', mask:true, weapon:'katana', foe:true, bulk:true, skin:'#b0b8c9' },
-              base:{ hp:2900, atk:124, def:68, spd:96, crit:10 }, skills:['e_heavy','e_blast','e_roar'] },
+              base:{ hp:2200, atk:132, def:68, spd:96, crit:10 }, skills:['e_heavy','e_blast','e_roar'] },
   hac_long: { name:'Hắc Long Vương', element:'am', boss:true, art:{ hair:'none', mask:true, weapon:'claws', foe:true, bulk:true, dragon:true, skin:'#8a7aa8' },
-              base:{ hp:3600, atk:130, def:76, spd:100, crit:12 }, skills:['e_sweep','e_heavy','e_bite','e_roar'] }
+              base:{ hp:2900, atk:142, def:76, spd:100, crit:12 }, skills:['e_sweep','e_heavy','e_bite','e_roar'] }
 };
 
 /* ---------- Chương hồi ---------- */
@@ -344,3 +344,87 @@ const DataUtil = {
   },
   rarity(id) { return RARITY[id] || RARITY[1]; }
 };
+
+
+/* =========================================================================
+   NGOẠI TRANG — trang phục, mũ và vũ khí tự thiết kế (thuần trang trí)
+   Mở khoá bằng vàng ở chợ đêm hoặc bằng thưởng nhiệm vụ.
+   ========================================================================= */
+const OUTFITS = [
+  { id:'ao_phong_van', name:'Phong Vân Bào', slot:'outfit', price:900,
+    robe:'#21384a', trim:'#6fe0ff', desc:'Vải nhẹ như mây, viền chỉ băng.' },
+  { id:'ao_hoa_sac',   name:'Hỏa Sắc Y',     slot:'outfit', price:900,
+    robe:'#4a1f24', trim:'#ff8a5c', desc:'Nhuộm bằng tro của rừng cháy.' },
+  { id:'ao_moc_lam',   name:'Mộc Lâm Y',     slot:'outfit', price:900,
+    robe:'#1f3a2a', trim:'#8ef0a8', desc:'Dệt từ lá của rừng sương.' },
+  { id:'ao_bach_long', name:'Bạch Long Bào', slot:'outfit', price:2200,
+    robe:'#dfe7f2', trim:'#7fd0ff', light:true, desc:'Bạch long phủ tuyết, chỉ dành cho người đủ bản lĩnh.' },
+  { id:'ao_huyet_nguyet', name:'Huyết Nguyệt Bào', slot:'outfit', price:0,
+    robe:'#3a1030', trim:'#ff5b8a', desc:'Chiến lợi phẩm lấy từ tế đàn Huyết Nguyệt.' },
+  { id:'ao_hac_long',  name:'Hắc Long Bào',  slot:'outfit', price:0,
+    robe:'#14121f', trim:'#c084fc', desc:'Vảy của Hắc Long Vương, vẫn còn ấm.' }
+];
+
+const HATS = [
+  { id:'non_la',    name:'Nón Lá Sương',    slot:'hat', price:500,  style:'straw',  color:'#c9a86a', desc:'Che nắng, che mưa, che cả ánh mắt.' },
+  { id:'sung_quy',  name:'Sừng Quỷ',        slot:'hat', price:700,  style:'horn',   color:'#ff6b3d', desc:'Sừng của loài quỷ núi, đeo để doạ người.' },
+  { id:'tai_cao',   name:'Tai Cáo Trắng',   slot:'hat', price:0,    style:'fox',    color:'#f2e6d8', desc:'Của một con hồ ly trắng trên đèo gió.' },
+  { id:'vuong_mien',name:'Vương Miện Nhẫn', slot:'hat', price:1400, style:'crown',  color:'#ffd166', desc:'Không phải vua, nhưng đấu trường gọi bạn là vậy.' },
+  { id:'long_giac', name:'Long Giác',       slot:'hat', price:0,    style:'dragon', color:'#a78bfa', desc:'Sừng rồng, lấy từ đỉnh Tháp Hắc Long.' }
+];
+
+const WEAPON_SKINS = [
+  { id:'ws_dao_bang', name:'Đoản Đao Băng', slot:'weaponSkin', price:600, kind:'katana', color:'#7fe3ff', desc:'Lưỡi đao đóng băng vĩnh viễn.' },
+  { id:'ws_quat_hoa', name:'Quạt Liệt Hỏa', slot:'weaponSkin', price:800, kind:'fan',    color:'#ff7a4d', desc:'Mỗi lần phe phẩy là một đốm lửa rơi.' },
+  { id:'ws_cung_phong',name:'Cung Phong Vân',slot:'weaponSkin', price:800, kind:'bow',   color:'#7ef0c0', desc:'Dây cung làm từ sợi gió.' },
+  { id:'ws_truong_loi',name:'Trượng Lôi Đình',slot:'weaponSkin',price:800, kind:'staff', color:'#facc15', desc:'Đầu trượng giữ một tia sét chưa tan.' },
+  { id:'ws_vuot_huyet',name:'Vuốt Huyết Nguyệt', slot:'weaponSkin', price:0, kind:'claws', color:'#ff5b8a', desc:'Ba lưỡi vuốt của giáo phái máu.' }
+];
+
+const COSMETIC_BY_ID = {};
+[...OUTFITS, ...HATS, ...WEAPON_SKINS].forEach(c => { COSMETIC_BY_ID[c.id] = c; });
+const COSMETIC_SLOTS = { outfit:'Trang phục', hat:'Mũ', weaponSkin:'Vũ khí' };
+
+/* =========================================================================
+   NHIỆM VỤ — chuỗi cốt truyện và nhiệm vụ hằng ngày
+   ========================================================================= */
+const STORY_QUESTS = [
+  { id:'sq1', name:'Tro Tàn Thức Giấc', giver:'Trưởng lão Hắc Vũ',
+    brief:'Quay lại bìa rừng nơi gia tộc bị đốt, đánh đuổi bọn sơn tặc đang chiếm tro tàn.',
+    story:'"Ba năm rồi. Ta cứ tưởng tro đã nguội. Nhưng ngươi còn sống, thì Hắc Vũ còn chưa hết."',
+    goal:{ kind:'stage', value:'1-1' }, reward:{ gold:160, items:{ hp_small:2 } } },
+  { id:'sq2', name:'Đồng Đội Đầu Tiên', giver:'Trưởng lão Hắc Vũ',
+    brief:'Một mình không dựng lại được gia tộc. Hãy có ít nhất 2 nhẫn giả trong đội hình.',
+    story:'"Kẻ mạnh đơn độc thì chết một mình. Kẻ biết nương tựa thì sống để báo thù."',
+    goal:{ kind:'recruit', value:2 }, reward:{ gold:220, cosmetic:'ao_phong_van' } },
+  { id:'sq3', name:'Bóng Chớp Trong Đêm', giver:'Lôi Phong',
+    brief:'Luyện tập đến khi một nhẫn giả của bạn đạt Lv 6.',
+    story:'"Ngươi chậm quá. Nhanh lên — kẻ địch của ngươi không chờ đâu."',
+    goal:{ kind:'level', value:6 }, reward:{ gold:260, cosmetic:'tai_cao' } },
+  { id:'sq4', name:'Máu Trên Đá', giver:'Mộc Yên',
+    brief:'Phá tan tế đàn của Huyết Nguyệt Giáo: hoàn thành chương 2.',
+    story:'"Ta đã chữa cho rất nhiều người. Đêm nay, ta sẽ không chữa cho bọn chúng."',
+    goal:{ kind:'chapter', value:2 }, reward:{ gold:420, cosmetic:'ws_vuot_huyet' } },
+  { id:'sq5', name:'Di Tích Thức Tỉnh', giver:'Vân Kiếm',
+    brief:'Vượt qua Di Tích Ngũ Hành và đưa thanh kiếm ra khỏi vỏ: hoàn thành chương 3.',
+    story:'"Thanh kiếm này chờ một người biết vì sao mình rút nó ra. Có lẽ là ngươi."',
+    goal:{ kind:'chapter', value:3 }, reward:{ gold:620, cosmetic:'ao_huyet_nguyet' } },
+  { id:'sq6', name:'Tên Trên Bảng Đá', giver:'Bang chủ Vô Ảnh Lâu',
+    brief:'Thắng 3 trận đấu trường để tên bạn được khắc lên bảng đá.',
+    story:'"Đấu trường không nhớ kẻ thắng một lần. Nó chỉ nhớ kẻ thắng mãi."',
+    goal:{ kind:'stat', key:'arenaWins', value:3 }, reward:{ gold:520, cosmetic:'vuong_mien' } },
+  { id:'sq7', name:'Hắc Long Vương', giver:'Trưởng lão Hắc Vũ',
+    brief:'Lên đỉnh Tháp Hắc Long, kết thúc mọi chuyện: hoàn thành chương 4.',
+    story:'"Đi đi. Tro cũ không cần thêm tro mới — nhưng kẻ đã đốt nó thì phải trả giá."',
+    goal:{ kind:'chapter', value:4 }, reward:{ gold:1400, cosmetic:'ao_hac_long', cosmetic2:'long_giac' } }
+];
+
+const DAILY_POOL = [
+  { id:'d_win3',   name:'Thắng 3 trận',            stat:'wins',         target:3,  reward:{ gold:150 } },
+  { id:'d_kill12', name:'Hạ gục 12 kẻ địch',       stat:'kills',        target:12, reward:{ gold:170 } },
+  { id:'d_ult5',   name:'Dùng 5 bí kỹ',            stat:'ults',         target:5,  reward:{ gold:130, items:{ chakra:1 } } },
+  { id:'d_arena1', name:'Thắng 1 trận đấu trường', stat:'arenaWins',    target:1,  reward:{ gold:190 } },
+  { id:'d_item3',  name:'Dùng 3 vật phẩm',         stat:'itemsUsed',    target:3,  reward:{ gold:100, items:{ hp_small:2 } } },
+  { id:'d_stage2', name:'Hoàn thành 2 nhiệm vụ',   stat:'stagesCleared',target:2,  reward:{ gold:210 } },
+  { id:'d_equip1', name:'Thay trang bị 1 lần',     stat:'equips',       target:1,  reward:{ gold:90, items:{ purify:1 } } }
+];

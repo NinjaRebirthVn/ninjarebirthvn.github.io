@@ -85,6 +85,11 @@ const Sfx = {
         case 'lose':
           [400, 320, 240].forEach((f, i) => this._tone(f, 0.3, { type: 'sine', vol: 0.045, delay: i * 0.12 }));
           break;
+        case 'ult':
+          this._tone(160, 0.5, { type: 'sawtooth', vol: 0.07, to: 60 });
+          this._noise(0.3, 0.06);
+          [392, 523, 784].forEach((f, i) => this._tone(f, 0.4, { type: 'triangle', vol: 0.04, delay: 0.06 + i * 0.07 }));
+          break;
         case 'battle':
           this._tone(120, 0.35, { type: 'sine', vol: 0.07, to: 70 });
           this._noise(0.25, 0.04);
