@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0c14">
+<meta name="robots" content="noindex">
+<title>Hướng dẫn nạp từ ngân hàng Việt → USDT TRC20 — Ninja Rebirth VN</title>
+<meta name="description" content="Hướng dẫn người chơi Việt Nam mua USDT bằng chuyển khoản ngân hàng rồi gửi mạng TRC20 vào trang nạp Ninja Rebirth VN.">
+<style>
+:root {
+  --ink: #070910;
+  --panel: #121627;
+  --panel-2: #171d31;
+  --line: rgba(255, 255, 255, .08);
+  --line-2: rgba(255, 255, 255, .14);
+  --text: #e9eef9;
+  --muted: #8b95ad;
+  --accent: #ff5a3c;
+  --accent-2: #ff9f43;
+  --gold: #ffd166;
+  --jade: #3fd6b0;
+  --danger: #ff5b6e;
+  --radius: 14px;
+  --shadow: 0 18px 44px rgba(0, 0, 0, .55);
+  --font: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--text);
+  background:
+    radial-gradient(1200px 600px at 50% -10%, #1b2543 0%, transparent 60%),
+    radial-gradient(900px 500px at 90% 110%, #2a1424 0%, transparent 55%),
+    linear-gradient(#070910, #06070d 60%, #04050a);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: "";
+  position: fixed; inset: 0; pointer-events: none; opacity: .5; z-index: 0;
+  background-image: repeating-linear-gradient(115deg, rgba(255,255,255,.022) 0 1px, transparent 1px 7px);
+}
+a { color: var(--accent-2); }
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 28px 18px 64px;
+}
+.brand {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 22px;
+}
+.brand-mark {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: linear-gradient(180deg, #ff7350, #e0392b);
+  box-shadow: 0 8px 22px rgba(224,57,43,.35);
+  display: grid; place-items: center;
+  font-weight: 800; font-size: 14px; color: #fff;
+}
+.brand strong { display: block; font-size: 15px; }
+.brand small { color: var(--muted); font-size: 12px; }
+.eyebrow {
+  font-size: 11px; letter-spacing: .28em; text-transform: uppercase;
+  color: var(--accent-2); margin: 0 0 8px;
+}
+h1 { margin: 0 0 8px; font-size: clamp(22px, 4vw, 28px); line-height: 1.25; }
+.lead { margin: 0 0 22px; color: var(--muted); line-height: 1.55; font-size: 14px; }
+.card {
+  background: linear-gradient(180deg, rgba(28,34,58,.85), rgba(16,20,36,.9));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+  margin-bottom: 16px;
+}
+.card h2 { margin: 0 0 12px; font-size: 16px; }
+.card h3 { margin: 16px 0 8px; font-size: 14.5px; color: var(--gold); }
+.card h3:first-child { margin-top: 0; }
+.warn {
+  border-color: rgba(255, 91, 110, .45);
+  background:
+    radial-gradient(500px 160px at 10% 0%, rgba(255,91,110,.18), transparent 70%),
+    linear-gradient(180deg, rgba(40,18,28,.9), rgba(16,12,18,.95));
+}
+.warn ul, .ok ul { margin: 0; padding-left: 18px; line-height: 1.65; font-size: 13.5px; }
+.warn ul { color: #ffc4cb; }
+.warn li, .ok li, .steps li { margin: 4px 0; }
+.warn strong, .ok strong { color: #fff; }
+.ok {
+  border-color: rgba(63,214,176,.35);
+  background:
+    radial-gradient(500px 160px at 90% 0%, rgba(63,214,176,.12), transparent 70%),
+    linear-gradient(180deg, rgba(18,36,40,.9), rgba(16,20,36,.95));
+}
+.ok ul { color: #b8f0df; }
+.tag {
+  display: inline-block;
+  font-size: 10.5px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(63,214,176,.45);
+  color: var(--jade);
+  background: rgba(63,214,176,.1);
+  letter-spacing: .04em;
+  margin-bottom: 10px;
+}
+.cta {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.btn {
+  border: 1px solid var(--line-2);
+  background: linear-gradient(180deg, #262c4a, #171c2e);
+  color: var(--text);
+  padding: 12px 16px;
+  border-radius: 11px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px; justify-content: center;
+  text-decoration: none;
+  transition: transform .12s ease, filter .18s ease;
+}
+.btn:hover { transform: translateY(-1px); filter: brightness(1.12); }
+.btn-primary {
+  background: linear-gradient(180deg, #ff7350, #e0392b);
+  border-color: rgba(255,190,160,.5);
+  color: #fff;
+  box-shadow: 0 10px 26px rgba(224,57,43,.35), inset 0 1px 0 rgba(255,255,255,.25);
+}
+.btn-ghost { background: rgba(255,255,255,.04); color: var(--text); }
+.steps { margin: 0; padding-left: 18px; color: #c9d1e6; line-height: 1.7; font-size: 13.5px; }
+.steps li { margin: 6px 0; }
+.checklist { margin: 0; padding-left: 0; list-style: none; }
+.checklist li {
+  position: relative;
+  padding: 10px 12px 10px 36px;
+  margin: 8px 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(0,0,0,.22);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #c9d1e6;
+}
+.checklist li::before {
+  content: "☐";
+  position: absolute; left: 12px; top: 10px;
+  color: var(--jade); font-size: 15px;
+}
+.addr {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  word-break: break-all;
+  background: rgba(0,0,0,.28);
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  padding: 10px 12px;
+  line-height: 1.45;
+  margin: 8px 0 0;
+}
+.note { margin-top: 12px; font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+.pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; }
+.pill {
+  font-size: 11px; padding: 4px 9px; border-radius: 999px;
+  border: 1px solid var(--line-2); color: var(--muted); background: rgba(255,255,255,.04);
+}
+.foot {
+  margin-top: 22px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+hr.soft {
+  border: 0; border-top: 1px solid var(--line); margin: 14px 0;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true">NR</div>
+    <div>
+      <strong>Ninja Rebirth VN</strong>
+      <small>ninjarebirthvn.com · Hướng dẫn nạp</small>
+    </div>
+  </div>
+
+  <p class="eyebrow">Dành cho người chơi Việt Nam</p>
+  <h1>Hướng dẫn nạp từ ngân hàng Việt → USDT TRC20</h1>
+  <p class="lead">Bạn chuyển khoản VND từ ngân hàng → mua USDT trên sàn uy tín → gửi <strong>USDT mạng TRC20 (Tron)</strong> vào trang nạp game. Làm trên điện thoại cũng được. Không cần gửi seed phrase / private key cho ai.</p>
+
+  <section class="card warn" aria-label="Cảnh báo quan trọng">
+    <h2>⚠ Đọc trước khi nạp</h2>
+    <ul>
+      <li>Chỉ gửi <strong>USDT · mạng TRC20 (Tron)</strong>. Gửi ERC20 / BEP20 / Solana… sẽ <strong>mất tiền</strong>.</li>
+      <li>Địa chỉ nhận bắt đầu bằng chữ <strong>T</strong> — không dùng địa chỉ bắt đầu <strong>0x</strong>.</li>
+      <li>Chỉ dùng sàn lớn: <strong>Binance, OKX, Bybit</strong>. Không mua OTC lạ trên Telegram / Zalo / app không rõ nguồn.</li>
+      <li>Giá P2P và phí rút thay đổi theo ngày. Lấy <strong>số USDT trên trang nạp</strong> làm mục tiêu (không lấy số VND ước lượng).</li>
+      <li>Admin / CSKH <strong>không bao giờ</strong> hỏi cụm từ khôi phục ví (12/24 từ) hay private key.</li>
+    </ul>
+  </section>
+
+  <section class="card" aria-label="Trang nạp">
+    <span class="tag">Bước 0 · Mở trang nạp</span>
+    <h2>Mở trang nạp chính thức</h2>
+    <p class="note" style="margin-top:0">Trên trang này có QR, nút sao chép địa chỉ và bảng gói (ước ~26.000 VND / 1 USDT, thị trường ~6/11/2026).</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="https://ninjarebirthvn.com/nap-usdt/">Mở trang nạp · ninjarebirthvn.com</a>
+      <a class="btn btn-ghost" href="/nap-usdt/"> /nap-usdt/ </a>
+    </div>
+    <p class="addr" title="Địa chỉ nhận TRC20">TDwyPUC2KR6jGofv1h4BpPg1VRRSNH55YM</p>
+    <p class="note">Nên copy địa chỉ bằng nút trên trang nạp (tránh gõ tay). Kiểm tra vài ký tự đầu/cuối trước khi gửi.</p>
+  </section>
+
+  <section class="card" aria-label="Cách A">
+    <span class="tag">Cách A · Phổ biến nhất</span>
+    <h2>Mua USDT bằng chuyển khoản ngân hàng (P2P)</h2>
+    <p class="note" style="margin-top:0">Áp dụng Binance / OKX / Bybit. Các bước tương tự; ví dụ dưới dùng <strong>Binance P2P</strong>.</p>
+
+    <h3>1) Cài app &amp; xác minh</h3>
+    <ol class="steps">
+      <li>Tải app chính thức <strong>Binance</strong> (hoặc OKX / Bybit) từ CH Play / App Store.</li>
+      <li>Đăng ký bằng SĐT/email Việt Nam → bật xác thực 2 lớp (SMS / Google Authenticator).</li>
+      <li>Hoàn tất KYC cơ bản nếu sàn yêu cầu trước khi P2P / rút tiền.</li>
+    </ol>
+
+    <h3>2) Mua USDT bằng VND (P2P)</h3>
+    <ol class="steps">
+      <li>Vào mục <strong>P2P</strong> → chọn mua <strong>USDT</strong>, tiền tệ <strong>VND</strong>.</li>
+      <li>Chọn người bán uy tín (nhiều lệnh, tỷ lệ hoàn thành cao), phương thức <strong>chuyển khoản ngân hàng</strong> (Vietcombank, MB, Techcombank, TPBank…).</li>
+      <li>Nhập số USDT bạn cần theo gói trên trang nạp (ví dụ gói $10 → mua khoảng <strong>10 USDT</strong>, có thể mua dư chút để trừ phí rút).</li>
+      <li>Xác nhận lệnh → chuyển khoản đúng số tiền / nội dung theo hướng dẫn trong app → chờ người bán nhả USDT vào ví sàn.</li>
+    </ol>
+    <p class="note">Giá VND/USDT trên P2P có thể lệch bảng trên trang nạp. Bạn chỉ cần đủ <strong>số USDT</strong> của gói; phần VND trả cho người bán là giá thị trường lúc đó.</p>
+
+    <h3>3) Rút USDT mạng TRC20 vào trang nạp</h3>
+    <ol class="steps">
+      <li>Trên sàn: <strong>Ví / Rút tiền (Withdraw)</strong> → chọn coin <strong>USDT</strong>.</li>
+      <li>Chọn mạng <strong>TRC20</strong> hoặc <strong>Tron</strong> (không chọn ERC20, BEP20, Sol…).</li>
+      <li>Dán địa chỉ từ <a href="https://ninjarebirthvn.com/nap-usdt/">trang nạp</a> (bắt đầu bằng <strong>T</strong>).</li>
+      <li>Nhập đúng số USDT của gói (1 / 2 / 5 / 10 / 20 / 25 / 30 / 50 / 100).</li>
+      <li>Kiểm tra phí rút mạng (thường vài USDT trên TRC20 — để dư phí trong ví sàn).</li>
+      <li>Xác nhận rút → lưu <strong>TxID / mã giao dịch</strong>.</li>
+    </ol>
+  </section>
+
+  <section class="card" aria-label="Cách B">
+    <span class="tag">Cách B · Đã có USDT</span>
+    <h2>Đã có Trust Wallet hoặc USDT trên sàn</h2>
+    <ol class="steps">
+      <li>Bỏ qua bước mua. Mở <strong>Trust Wallet</strong> (hoặc ví/sàn đang giữ USDT).</li>
+      <li>Chọn đúng token <strong>USDT (TRC20) / Tether · Tron</strong> — có huy hiệu mạng Tron, không phải ERC20/BEP20.</li>
+      <li>Bấm <strong>Send / Gửi</strong> → dán địa chỉ hoặc quét QR trên <a href="https://ninjarebirthvn.com/nap-usdt/">trang nạp</a>.</li>
+      <li>Nhập đúng số gói → xác nhận mạng <strong>TRC20</strong> → gửi.</li>
+      <li>Giữ TxID và nhắn CSKH (xem checklist bên dưới).</li>
+    </ol>
+    <p class="note">Nếu USDT đang ở mạng khác (ERC20/BEP20), hãy rút/chuyển sang TRC20 trên sàn trước — đừng gửi thẳng mạng khác vào địa chỉ T…</p>
+  </section>
+
+  <section class="card ok" aria-label="Checklist rút">
+    <h2>✓ Checklist trước khi bấm gửi</h2>
+    <ul class="checklist">
+      <li>Mạng đã chọn: <strong>TRC20 / Tron</strong></li>
+      <li>Địa chỉ dán từ trang nạp (hoặc nút Sao chép), bắt đầu bằng <strong>T</strong></li>
+      <li>Số lượng = đúng gói trên <a href="https://ninjarebirthvn.com/nap-usdt/">ninjarebirthvn.com/nap-usdt/</a></li>
+      <li>Đã xem phí rút; số dư đủ USDT + phí</li>
+      <li>Đã lưu <strong>TxID</strong> sau khi gửi</li>
+      <li>Nhắn CSKH / admin: nickname game + gói + TxID để được cộng</li>
+    </ul>
+    <p class="note">Tiền thường vào ví nhận trong vài giây đến 1–2 phút. Có thể tự xem trên <a href="https://tronscan.org/" target="_blank" rel="noopener noreferrer">tronscan.org</a> bằng cách dán địa chỉ nhận.</p>
+  </section>
+
+  <section class="card" aria-label="Phí và lưu ý">
+    <h2>Phí, giá &amp; lưu ý thêm</h2>
+    <ul class="steps" style="padding-left:18px;list-style:disc">
+      <li>Bảng VND trên trang nạp chỉ mang tính tham khảo (~26.000 VND/USDT ngày 6/11/2026).</li>
+      <li>P2P có thể đắt/rẻ hơn; phí rút TRC20 do sàn thu — tính vào số dư trước khi chọn gói.</li>
+      <li>Nên rút thử số nhỏ lần đầu nếu bạn chưa từng gửi TRC20.</li>
+      <li>Không dùng bot / nhóm “đổi tiền” lạ; không chia sẻ mã 2FA, OTP ngân hàng, seed phrase.</li>
+    </ul>
+    <div class="pill-row">
+      <span class="pill">Binance</span>
+      <span class="pill">OKX</span>
+      <span class="pill">Bybit</span>
+      <span class="pill">Trust Wallet → USDT TRC20</span>
+    </div>
+  </section>
+
+  <section class="card" aria-label="Liên kết nhanh">
+    <h2>Liên kết nhanh</h2>
+    <div class="cta">
+      <a class="btn btn-primary" href="https://ninjarebirthvn.com/nap-usdt/">Trang nạp USDT</a>
+      <a class="btn btn-ghost" href="https://ninjarebirthvn.com/">Trang chủ ninjarebirthvn.com</a>
+      <a class="btn btn-ghost" href="https://tronscan.org/#/address/TDwyPUC2KR6jGofv1h4BpPg1VRRSNH55YM" target="_blank" rel="noopener noreferrer">Xem địa chỉ trên Tronscan</a>
+    </div>
+  </section>
+
+  <p class="foot">
+    Ninja Rebirth VN · Hướng dẫn nạp thủ công · Không yêu cầu seed phrase / private key.<br>
+    <a href="https://ninjarebirthvn.com/nap-usdt/">← Về trang nạp</a>
+    ·
+    <a href="https://ninjarebirthvn.com/">Trang chủ</a>
+  </p>
+</div>
+</body>
+</html>
