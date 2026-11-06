@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0c14">
+<meta name="robots" content="noindex">
+<title>Nạp USDT TRC20 — Ninja Rebirth VN</title>
+<meta name="description" content="Nạp USDT mạng TRC20 (Tron) cho Ninja Rebirth VN. Chỉ gửi TRC20 — gửi sai mạng sẽ mất tiền.">
+<style>
+/* Match Ninja Rebirth VN palette (inline so page is self-contained) */
+:root {
+  --ink: #070910;
+  --panel: #121627;
+  --panel-2: #171d31;
+  --line: rgba(255, 255, 255, .08);
+  --line-2: rgba(255, 255, 255, .14);
+  --text: #e9eef9;
+  --muted: #8b95ad;
+  --accent: #ff5a3c;
+  --accent-2: #ff9f43;
+  --gold: #ffd166;
+  --jade: #3fd6b0;
+  --danger: #ff5b6e;
+  --radius: 14px;
+  --shadow: 0 18px 44px rgba(0, 0, 0, .55);
+  --font: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--text);
+  background:
+    radial-gradient(1200px 600px at 50% -10%, #1b2543 0%, transparent 60%),
+    radial-gradient(900px 500px at 90% 110%, #2a1424 0%, transparent 55%),
+    linear-gradient(#070910, #06070d 60%, #04050a);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: "";
+  position: fixed; inset: 0; pointer-events: none; opacity: .5; z-index: 0;
+  background-image: repeating-linear-gradient(115deg, rgba(255,255,255,.022) 0 1px, transparent 1px 7px);
+}
+a { color: var(--accent-2); }
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 28px 18px 64px;
+}
+.brand {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 22px;
+}
+.brand-mark {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: linear-gradient(180deg, #ff7350, #e0392b);
+  box-shadow: 0 8px 22px rgba(224,57,43,.35);
+  display: grid; place-items: center;
+  font-weight: 800; font-size: 14px; color: #fff;
+}
+.brand strong { display: block; font-size: 15px; }
+.brand small { color: var(--muted); font-size: 12px; }
+.eyebrow {
+  font-size: 11px; letter-spacing: .28em; text-transform: uppercase;
+  color: var(--accent-2); margin: 0 0 8px;
+}
+h1 { margin: 0 0 8px; font-size: clamp(22px, 4vw, 28px); }
+.lead { margin: 0 0 22px; color: var(--muted); line-height: 1.55; font-size: 14px; }
+
+.card {
+  background: linear-gradient(180deg, rgba(28,34,58,.85), rgba(16,20,36,.9));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+  margin-bottom: 16px;
+}
+.card h2 { margin: 0 0 12px; font-size: 16px; }
+.warn {
+  border-color: rgba(255, 91, 110, .45);
+  background:
+    radial-gradient(500px 160px at 10% 0%, rgba(255,91,110,.18), transparent 70%),
+    linear-gradient(180deg, rgba(40,18,28,.9), rgba(16,12,18,.95));
+}
+.warn ul { margin: 0; padding-left: 18px; color: #ffc4cb; line-height: 1.65; font-size: 13.5px; }
+.warn li { margin: 4px 0; }
+.warn strong { color: #fff; }
+
+.qr-block {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 18px;
+  align-items: center;
+}
+@media (max-width: 560px) {
+  .qr-block { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+}
+.qr-frame {
+  width: 180px; height: 180px;
+  padding: 10px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid var(--line-2);
+}
+.qr-frame img { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.addr-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.addr {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  word-break: break-all;
+  background: rgba(0,0,0,.28);
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  padding: 10px 12px;
+  line-height: 1.45;
+}
+.addr-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+@media (max-width: 560px) { .addr-actions { justify-content: center; } }
+
+.btn {
+  border: 1px solid var(--line-2);
+  background: linear-gradient(180deg, #262c4a, #171c2e);
+  color: var(--text);
+  padding: 10px 16px;
+  border-radius: 11px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px; justify-content: center;
+  transition: transform .12s ease, filter .18s ease;
+}
+.btn:hover { transform: translateY(-1px); filter: brightness(1.12); }
+.btn-primary {
+  background: linear-gradient(180deg, #ff7350, #e0392b);
+  border-color: rgba(255,190,160,.5);
+  color: #fff;
+  box-shadow: 0 10px 26px rgba(224,57,43,.35), inset 0 1px 0 rgba(255,255,255,.25);
+}
+.btn-ghost { background: rgba(255,255,255,.04); }
+.tag {
+  display: inline-block;
+  font-size: 10.5px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(63,214,176,.45);
+  color: var(--jade);
+  background: rgba(63,214,176,.1);
+  letter-spacing: .04em;
+  margin-bottom: 10px;
+}
+
+table.pkgs {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+table.pkgs th, table.pkgs td {
+  text-align: left;
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--line);
+}
+table.pkgs th { color: var(--muted); font-weight: 600; font-size: 12px; }
+table.pkgs tr:last-child td { border-bottom: 0; }
+table.pkgs .usdt { color: var(--gold); font-weight: 700; font-variant-numeric: tabular-nums; }
+.note { margin-top: 12px; font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+
+.steps { margin: 0; padding-left: 18px; color: var(--text); line-height: 1.7; font-size: 13.5px; }
+.steps li { margin: 4px 0; color: #c9d1e6; }
+.foot {
+  margin-top: 22px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px);
+  background: #1a2338; border: 1px solid var(--jade); color: var(--jade);
+  padding: 10px 16px; border-radius: 999px; font-size: 13px; font-weight: 600;
+  opacity: 0; pointer-events: none; transition: .22s ease; z-index: 20;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true">NR</div>
+    <div>
+      <strong>Ninja Rebirth VN</strong>
+      <small>Trang nạp USDT · mạng TRC20 (Tron)</small>
+    </div>
+  </div>
+
+  <p class="eyebrow">Nạp xu / gói hỗ trợ</p>
+  <h1>Nạp USDT mạng TRC20</h1>
+  <p class="lead">Chỉ gửi <strong>USDT trên mạng TRC20 (Tron)</strong> vào địa chỉ bên dưới. Gửi sai mạng (ERC20, BEP20, Solana…) sẽ <strong>mất tiền</strong> và không hoàn lại.</p>
+
+  <section class="card warn" aria-label="Cảnh báo quan trọng">
+    <h2>⚠ Bắt buộc đọc trước khi gửi</h2>
+    <ul>
+      <li>Chỉ gửi <strong>USDT · TRC20 (Tron)</strong>.</li>
+      <li>Địa chỉ bắt đầu bằng chữ <strong>T</strong> — không dùng địa chỉ bắt đầu <strong>0x</strong> (ERC20/BEP20).</li>
+      <li>Gửi đúng số lượng gói (hoặc số lẻ nhận diện nếu admin yêu cầu).</li>
+      <li>Nên gửi thử số nhỏ lần đầu. Tiền thường về trong vài giây đến 1–2 phút.</li>
+      <li>Không gửi coin/token khác vào địa chỉ này.</li>
+    </ul>
+  </section>
+
+  <section class="card" aria-label="Địa chỉ nhận">
+    <span class="tag">Mạng: TRC20 · Tron</span>
+    <h2>Địa chỉ nhận &amp; mã QR</h2>
+    <div class="qr-block">
+      <div class="qr-frame">
+        <img id="qr-img" alt="Mã QR địa chỉ USDT TRC20" width="160" height="160" decoding="async">
+      </div>
+      <div>
+        <div class="addr-label">Địa chỉ ví USDT (TRC20)</div>
+        <div class="addr" id="addr-text"></div>
+        <div class="addr-actions">
+          <button type="button" class="btn btn-primary" id="btn-copy">Sao chép địa chỉ</button>
+          <a class="btn btn-ghost" id="btn-tronscan" href="#" target="_blank" rel="noopener noreferrer">Xem trên Tronscan</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" aria-label="Bảng gói">
+    <h2>Bảng gói (có thể chỉnh trong CONFIG)</h2>
+    <table class="pkgs">
+      <thead>
+        <tr><th>Gói</th><th>Gửi USDT</th><th>Quy đổi</th></tr>
+      </thead>
+      <tbody id="pkg-body"></tbody>
+    </table>
+    <p class="note" id="pkg-note"></p>
+  </section>
+
+  <section class="card" aria-label="Hướng dẫn">
+    <h2>Cách nạp (Trust Wallet / ví khác)</h2>
+    <ol class="steps">
+      <li>Mở ví → chọn <strong>USDT (TRC20)</strong> / Tether TRC20.</li>
+      <li>Chọn <strong>Send</strong> → dán địa chỉ ở trên (hoặc quét QR).</li>
+      <li>Nhập đúng số USDT theo gói → xác nhận mạng là <strong>TRC20 / Tron</strong>.</li>
+      <li>Sau khi gửi, giữ mã giao dịch (TxID) và nhắn admin / CSKH để được cộng.</li>
+      <li>Tự kiểm tra: mở Tronscan → dán địa chỉ → tab Transactions.</li>
+    </ol>
+  </section>
+
+  <p class="foot">
+    Ninja Rebirth VN · Trang nạp thủ công · Không yêu cầu seed phrase / private key.<br>
+    <a href="/">← Về trang chủ</a>
+  </p>
+</div>
+<div class="toast" id="toast" role="status">Đã sao chép địa chỉ</div>
+
+<script>
+/* ========== CHỈNH Ở ĐÂY ========== */
+const CONFIG = {
+  // Địa chỉ nhận USDT TRC20 (bắt đầu bằng T). Không bao giờ đưa seed / private key vào file này.
+  address: "TDwyPUC2KR6jGofv1h4BpPg1VRRSNH55YM",
+  networkLabel: "USDT · TRC20 (Tron)",
+  packages: [
+    { name: "Gói $1",   usdt: 1,   vnd: "10.000 VND" },
+    { name: "Gói $2",   usdt: 2,   vnd: "20.000 VND" },
+    { name: "Gói $5",   usdt: 5,   vnd: "50.000 VND" },
+    { name: "Gói $10",  usdt: 10,  vnd: "100.000 VND" },
+    { name: "Gói $20",  usdt: 20,  vnd: "200.000 VND" },
+    { name: "Gói $25",  usdt: 25,  vnd: "250.000 VND" },
+    { name: "Gói $30",  usdt: 30,  vnd: "300.000 VND" },
+    { name: "Gói $50",  usdt: 50,  vnd: "500.000 VND" },
+    { name: "Gói $100", usdt: 100, vnd: "1.000.000 VND" }
+  ],
+  packageNote: "Tỷ giá tham khảo; admin có thể đổi. Nếu cần nhận diện giao dịch, gửi số lẻ theo hướng dẫn CSKH (ví dụ 10.05 USDT)."
+};
+/* ================================= */
+
+(function () {
+  const addr = String(CONFIG.address || "").trim();
+  const addrEl = document.getElementById("addr-text");
+  const qrImg = document.getElementById("qr-img");
+  const tronscan = document.getElementById("btn-tronscan");
+  const pkgBody = document.getElementById("pkg-body");
+  const pkgNote = document.getElementById("pkg-note");
+  const toast = document.getElementById("toast");
+
+  addrEl.textContent = addr;
+  tronscan.href = "https://tronscan.org/#/address/" + encodeURIComponent(addr);
+
+  // QR công khai từ api.qrserver.com (địa chỉ ví, không phải seed)
+  const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=8&data="
+    + encodeURIComponent(addr);
+  qrImg.src = qrUrl;
+
+  pkgBody.innerHTML = (CONFIG.packages || []).map(function (p) {
+    return "<tr><td>" + escapeHtml(p.name) + "</td>"
+      + "<td class=\"usdt\">" + Number(p.usdt).toFixed(2) + " USDT</td>"
+      + "<td>" + escapeHtml(p.vnd) + "</td></tr>";
+  }).join("");
+  pkgNote.textContent = CONFIG.packageNote || "";
+
+  document.getElementById("btn-copy").addEventListener("click", async function () {
+    try {
+      await navigator.clipboard.writeText(addr);
+      showToast("Đã sao chép địa chỉ");
+    } catch (e) {
+      // fallback
+      const ta = document.createElement("textarea");
+      ta.value = addr; document.body.appendChild(ta);
+      ta.select(); document.execCommand("copy"); ta.remove();
+      showToast("Đã sao chép địa chỉ");
+    }
+  });
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function () { toast.classList.remove("show"); }, 1800);
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" })[c];
+    });
+  }
+})();
+</script>
+</body>
+</html>
